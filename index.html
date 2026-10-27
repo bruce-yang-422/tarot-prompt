@@ -3,10 +3,59 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src https://api.openai.com; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <meta name="description" content="輸入問題、抽塔羅牌，產生完整的解牌 Prompt，一鍵複製到 ChatGPT、Claude 或 Gemini。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src https://api.openai.com; object-src 'none'; base-uri 'none'; form-action 'none';">
+  <title>問牌 Prompt｜塔羅抽牌與 AI 解牌 Prompt 產生器</title>
+  <meta name="description" content="免費線上塔羅抽牌，或輸入你手上實體牌的結果。16 種牌陣、1909 年原版偉特牌圖，自動整理成完整的解牌 Prompt，一鍵複製到 ChatGPT、Claude、Gemini 讓 AI 幫你解牌。">
+  <meta name="keywords" content="塔羅牌,線上抽牌,塔羅占卜,AI 解牌,ChatGPT 塔羅,解牌 Prompt,偉特塔羅,凱爾特十字,tarot,tarot prompt">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://tarot.stack-base.com/">
+
+  <!-- 社群分享預覽（Facebook、LINE、X 等） -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="問牌 Prompt">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:url" content="https://tarot.stack-base.com/">
+  <meta property="og:title" content="問牌 Prompt｜塔羅抽牌與 AI 解牌 Prompt 產生器">
+  <meta property="og:description" content="抽塔羅牌或輸入實體牌，自動整理成完整的解牌 Prompt，一鍵複製到 ChatGPT、Claude、Gemini。">
+  <meta property="og:image" content="https://tarot.stack-base.com/icons/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="問牌 Prompt：抽塔羅牌，產生給 AI 的解牌 Prompt">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="問牌 Prompt｜塔羅抽牌與 AI 解牌 Prompt 產生器">
+  <meta name="twitter:description" content="抽塔羅牌或輸入實體牌，自動整理成完整的解牌 Prompt，一鍵複製到 ChatGPT、Claude、Gemini。">
+  <meta name="twitter:image" content="https://tarot.stack-base.com/icons/og-image.jpg">
+
+  <!-- 圖示與 PWA -->
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0e0c1d">
-  <title>問牌 Prompt</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="問牌 Prompt">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- 結構化資料：資料區塊不會被執行，不受 CSP 的 script-src 限制 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "問牌 Prompt",
+    "alternateName": "Tarot Prompt",
+    "url": "https://tarot.stack-base.com/",
+    "description": "免費線上塔羅抽牌與 AI 解牌 Prompt 產生器。抽牌或輸入實體牌，整理成給 ChatGPT、Claude、Gemini 的解牌 Prompt。",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "Any",
+    "inLanguage": "zh-Hant-TW",
+    "image": "https://tarot.stack-base.com/icons/og-image.jpg",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TWD" },
+    "author": { "@type": "Person", "name": "Bruce Yang" }
+  }
+  </script>
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -44,7 +93,8 @@
   <main id="app" tabindex="-1">
 
     <!-- 首頁 -->
-    <section class="view" data-view="home" hidden>
+    <!-- 首頁預設顯示（不加 hidden），程式還沒執行時搜尋引擎也讀得到內容 -->
+    <section class="view" data-view="home">
       <div class="hero">
         <h1>抽牌，然後讓 AI 解牌</h1>
         <p class="muted">輸入你的問題、抽出塔羅牌，這裡會整理出一份完整的解牌 Prompt，複製後貼到 ChatGPT、Claude 或 Gemini 就能得到解讀。</p>
@@ -62,6 +112,16 @@
         </button>
       </div>
       <a class="recent" id="recentLink" href="#/history" hidden></a>
+
+      <section class="how" aria-labelledby="howTitle">
+        <h2 id="howTitle">怎麼用</h2>
+        <ol class="how-steps">
+          <li><strong>寫下問題</strong>選擇想問的方向，點選幾個關於你的狀況，不知道怎麼問也有提示。</li>
+          <li><strong>抽牌</strong>從 16 種牌陣中挑一個，線上隨機抽牌，或輸入你手上實體牌的結果。</li>
+          <li><strong>交給 AI 解牌</strong>複製整理好的 Prompt，貼到 ChatGPT、Claude 或 Gemini。</li>
+        </ol>
+        <p class="muted small">使用 1909 年原版偉特塔羅（Rider–Waite–Smith）牌圖。免費使用，資料只存在你的瀏覽器；可以「加到主畫面」當成 App 使用。</p>
+      </section>
     </section>
 
     <!-- ① 問題 -->

@@ -1590,6 +1590,11 @@
   // ---------- 啟動 ----------
 
   if (!T.store.available) $('#storageWarning').hidden = false;
+
+  // PWA：註冊 Service Worker（只在 https 或 localhost；直接雙擊開檔的 file:// 不支援）
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
   window.addEventListener('hashchange', route);
   route();
 })();

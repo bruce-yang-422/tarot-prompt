@@ -1,0 +1,138 @@
+# Tarot Prompt (問牌 Prompt)
+
+**English** | [繁體中文](README.md)
+
+[![Live demo](https://img.shields.io/badge/demo-tarot.stack--base.com-d9b45a)](https://tarot.stack-base.com)
+![Vanilla JS](https://img.shields.io/badge/vanilla-HTML%20%7C%20CSS%20%7C%20JS-1b1736)
+![No build step](https://img.shields.io/badge/build-none-1b1736)
+![No backend](https://img.shields.io/badge/backend-none-1b1736)
+![PWA](https://img.shields.io/badge/PWA-installable-1b1736)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+A tarot draw tool that turns your question, spread and cards into a structured reading prompt for ChatGPT, Claude or Gemini.
+
+The app does not interpret the cards itself. It collects everything an LLM needs for a good reading — the question, background, spread positions, card orientation and card statistics — and formats it as YAML settings plus JSON card data that you can copy with one click.
+
+**Live demo:** <https://tarot.stack-base.com>
+
+<p>
+  <img src="docs/screenshots/desktop-result.jpg" alt="Result page with the drawn spread and the generated prompt" width="640">
+  <img src="docs/screenshots/mobile-question.jpg" alt="Question step on mobile with category chips and the background questionnaire" width="180">
+</p>
+
+## Features
+
+- **Two ways to draw**
+  - Online draw: Fisher–Yates shuffle with `crypto.getRandomValues`, 50% chance of reversal
+  - Physical deck: enter the cards you drew, with search (Chinese, English and aliases), orientation toggle and "jumper" cards
+- **16 spreads in 6 groups**, recommended from the question and questionnaire answers (single card, yes/no, timeline, six-month forecast, relationship, two/three options, Celtic Cross, self-reflection spreads and more)
+- **Category-based background questionnaire** with single-choice, multi-choice and short-answer items instead of a blank text box; key items such as relationship status are required
+- **Question coaching**: live hints for better phrasing (first person, affirmative, within three months)
+- **Structured prompt output**
+  - YAML settings + JSON card data
+  - Card statistics: Major/Minor ratio, element distribution, court cards, repeated numbers
+  - Guidelines for reading reversed cards; self-reflection spreads switch to a guided-dialogue format
+  - Selectable tone and response length
+- **Result page**: public-domain 1909 Rider–Waite–Smith artwork, board that scales to the viewport, clarifier cards, redraw reminder
+- **History** stored locally in the browser
+- **Optional AI assist**
+  - Without an API key: copy a "refine my question" prompt to any chatbot and paste the answer back
+  - With your own OpenAI API key: refine the question and generate follow-up background questions directly (default model `gpt-6-luna`)
+- **PWA**: installable to the home screen; the first visit downloads the whole site in the background (about 16 MB including all 78 card images), after which it works fully offline
+- **SEO**: Open Graph / Twitter card previews, JSON-LD structured data, `sitemap.xml`, `robots.txt`
+- **Accessibility**: keyboard navigation, `aria-live` announcements, respects `prefers-reduced-motion`
+- **Safety**: shows crisis hotlines when self-harm related wording is detected
+
+## Tech stack
+
+- Plain HTML, CSS and JavaScript — no framework, no bundler, no dependencies
+- Classic `<script>` tags instead of ES modules so the app also runs from `file://`
+- `localStorage` / `sessionStorage` for history, drafts, settings and the optional API key
+- Hand-drawn SVG icon sprite
+- Service worker: precaches the app shell and all card images on install; network-first for the app shell, cache-first for card images
+- Hosted on GitHub Pages behind Cloudflare
+
+## Getting started
+
+```bash
+git clone https://github.com/bruce-yang-422/tarot-prompt.git
+cd tarot-prompt
+```
+
+Then open `index.html` in a browser. There is nothing to install or build.
+
+To serve it over HTTP instead (closer to production; the PWA and offline features only work over HTTP/HTTPS):
+
+```bash
+python -m http.server 8000
+# open http://localhost:8000
+```
+
+## Configuration
+
+The OpenAI integration is optional and configured per user in the browser:
+
+1. Open **設定 (Settings)** in the top bar
+2. Paste an OpenAI API key and choose whether to remember it on this device or for this session only
+3. Click **測試連線 (Test connection)** to list the chat models available to your account
+
+Notes:
+
+- A ChatGPT Plus subscription does not include API access; API keys are created and billed separately at [platform.openai.com](https://platform.openai.com).
+- The key never leaves the browser except in requests sent directly to `api.openai.com`.
+- Clearing browser data removes the stored key. OpenAI only shows a key once, so keep your own backup in a password manager.
+
+## Deployment
+
+The site is static, so any static host works. For GitHub Pages:
+
+1. **Settings → Pages → Build and deployment**: deploy from branch `main`, folder `/ (root)`
+2. For a custom domain, set it under **Custom domain** (this commits the `CNAME` file) and point a DNS `CNAME` record at `<user>.github.io`
+3. After changing app shell files, bump `SHELL_CACHE` in `sw.js` so installed clients pick up the new version sooner
+4. When moving to another domain, also update the canonical and Open Graph URLs in `index.html`, `robots.txt` and `sitemap.xml`
+
+## Project structure
+
+```text
+.
+├── index.html            # Markup, views, SVG icon sprite and SEO tags
+├── manifest.webmanifest  # PWA manifest
+├── sw.js                 # Service worker (offline cache)
+├── robots.txt
+├── sitemap.xml
+├── CNAME                 # GitHub Pages custom domain
+├── css/style.css         # Styles (dark theme, responsive layout)
+├── js/
+│   ├── cards.js          # 78-card data, keywords, element/number/court tables, image paths
+│   ├── spreads.js        # 16 spread definitions and recommendation rules
+│   ├── background.js     # Background questionnaire definitions
+│   ├── prompt.js         # Card statistics, question hints, prompt builder
+│   ├── storage.js        # History, drafts, settings and API key storage
+│   ├── ai.js             # OpenAI calls: refine question, follow-up questions
+│   └── app.js            # Routing, views and interactions
+├── images/rws-1909/      # 78 card images + manifest.json (source and license)
+├── icons/                # Favicons, PWA icons and the social preview image
+├── docs/screenshots/     # Images used in this README
+├── README.md             # Traditional Chinese README
+└── LICENSE               # MIT License
+```
+
+## Privacy and security
+
+- There is no backend. Questions, history and settings stay in the user's browser.
+- A Content Security Policy only allows same-origin scripts and outbound requests to `api.openai.com`.
+- No third-party scripts, analytics or fonts are loaded.
+
+## Browser support
+
+Recent versions of Chrome, Edge, Firefox and Safari, on desktop and mobile. The app relies on `<dialog>`, CSS Grid and `crypto.getRandomValues`.
+
+## Disclaimer
+
+Tarot readings are for reflection and entertainment only. They are not a substitute for medical, legal, financial or psychological advice.
+
+## License
+
+The source code is released under the [MIT License](LICENSE).
+
+The card artwork is the 1909 Rider–Waite–Smith deck illustrated by Pamela Colman Smith, which is in the public domain. Images are from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:Rider-Waite_tarot_deck_(Roses_%26_Lilies)); per-file sources are listed in `images/rws-1909/manifest.json`.
