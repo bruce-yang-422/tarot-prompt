@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src https://api.openai.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="輸入問題、抽塔羅牌，產生完整的解牌 Prompt，一鍵複製到 ChatGPT、Claude 或 Gemini。">
+  <meta name="theme-color" content="#0e0c1d">
+  <title>問牌 Prompt</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 自製 SVG 圖示：以 <svg class="icon"><use href="#i-名稱"></use></svg> 引用 -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M19.5 14.2A8 8 0 1 1 9.8 4.5a6.3 6.3 0 0 0 9.7 9.7Z"/><path d="M17 3.5c.3 1.6 1 2.3 2.5 2.5-1.5.2-2.2.9-2.5 2.5-.3-1.6-1-2.3-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5Z"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3.5" y="5" width="9" height="14" rx="1.5" transform="rotate(-12 8 12)"/><rect x="11.5" y="5" width="9" height="14" rx="1.5" transform="rotate(10 16 12)"/><path d="M16 9.2c.2 1.1.7 1.6 1.8 1.8-1.1.2-1.6.7-1.8 1.8-.2-1.1-.7-1.6-1.8-1.8 1.1-.2 1.6-.7 1.8-1.8Z"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><rect x="8" y="2.5" width="9" height="12.5" rx="1.5"/><path d="M12.5 6.5v3M11 8h3"/><path d="M3.5 13.5 7 12a2 2 0 0 1 2.3.6l1.2 1.4h4.3a1.7 1.7 0 0 1 0 3.4H11"/><path d="M3.5 20.5h9.8a4 4 0 0 0 2.6-1l4.2-3.8a1.6 1.6 0 0 0-2.1-2.4l-2.5 2"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4.5v3.8h3.8"/><path d="M12 8v4.2l2.8 1.8"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1"/><circle cx="15" cy="6.5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17.5" r="2"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M10 3.5c.7 4.4 2.6 6.3 7 7-4.4.7-6.3 2.6-7 7-.7-4.4-2.6-6.3-7-7 4.4-.7 6.3-2.6 7-7Z"/><path d="M18.5 14.5c.3 1.6.9 2.2 2.5 2.5-1.6.3-2.2.9-2.5 2.5-.3-1.6-.9-2.2-2.5-2.5 1.6-.3 2.2-.9 2.5-2.5Z"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.5 18h5M10.5 21h3"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.1v.1h5v-.1c0-.8.4-1.6 1.1-2.1A6 6 0 0 0 12 3Z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2"/><path d="M15.5 8.5V6A2 2 0 0 0 13.5 4H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path class="fill" d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5.5 6.5 6.5L9 18.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#app">跳到主要內容</a>
+
+  <header class="topbar">
+    <a class="brand" href="#/"><svg class="icon brand-icon" aria-hidden="true"><use href="#i-logo"></use></svg>問牌 <span>Prompt</span></a>
+    <nav class="topnav" aria-label="主選單">
+      <a class="topnav-btn" href="#/history"><svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>紀錄</a>
+      <button class="topnav-btn" type="button" id="openSettings"><svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg>設定</button>
+    </nav>
+  </header>
+
+  <p id="storageWarning" class="notice" hidden>這個瀏覽器無法保存資料（可能是無痕模式），占卜紀錄在重新整理後會消失，其他功能照常。</p>
+
+  <main id="app" tabindex="-1">
+
+    <!-- 首頁 -->
+    <section class="view" data-view="home" hidden>
+      <div class="hero">
+        <h1>抽牌，然後讓 AI 解牌</h1>
+        <p class="muted">輸入你的問題、抽出塔羅牌，這裡會整理出一份完整的解牌 Prompt，複製後貼到 ChatGPT、Claude 或 Gemini 就能得到解讀。</p>
+      </div>
+      <div class="mode-cards">
+        <button class="mode-card" type="button" data-start="auto">
+          <svg class="icon mode-icon" aria-hidden="true"><use href="#i-cards"></use></svg>
+          <span class="mode-title">系統自動抽牌</span>
+          <span class="mode-desc">沒有牌也能占卜</span>
+        </button>
+        <button class="mode-card" type="button" data-start="manual">
+          <svg class="icon mode-icon" aria-hidden="true"><use href="#i-hand"></use></svg>
+          <span class="mode-title">實體牌手動輸入</span>
+          <span class="mode-desc">用自己的牌，輸入抽到的結果</span>
+        </button>
+      </div>
+      <a class="recent" id="recentLink" href="#/history" hidden></a>
+    </section>
+
+    <!-- ① 問題 -->
+    <section class="view" data-view="ask" hidden>
+      <div class="steps-slot"></div>
+      <div id="sensitiveBanner" class="help-banner" role="alert" hidden>
+        <strong>如果你正承受很大的痛苦，請先照顧自己。</strong>
+        你不必一個人面對，可以撥打：衛福部安心專線 <a href="tel:1925">1925</a>（24 小時）、生命線 <a href="tel:1995">1995</a>、張老師 <a href="tel:1980">1980</a>。
+      </div>
+      <fieldset class="chips-field">
+        <legend class="field-label">想問哪方面的事？</legend>
+        <div class="chips" id="categoryChips"></div>
+      </fieldset>
+
+      <label class="field-label" for="fQuestion">你想問什麼？</label>
+      <textarea id="fQuestion" class="input" data-field="question" rows="3" placeholder="例如：我要如何爭取升遷的機會？" maxlength="300"></textarea>
+      <p class="field-error" id="questionError" hidden>請先輸入問題</p>
+      <ul class="hints" id="questionHints" aria-live="polite"></ul>
+      <p class="muted small ai-jump">不知道怎麼問？先隨意寫個大概，填完下面的狀況後，可以<button type="button" class="link-btn" id="jumpToAi">請 AI 幫你整理</button>。</p>
+
+      <details class="tips">
+        <summary><svg class="icon" aria-hidden="true"><use href="#i-bulb"></use></svg>好問題的 5 個原則</summary>
+        <table class="tips-table">
+          <thead><tr><th>原則</th><th>不建議</th><th>建議</th></tr></thead>
+          <tbody>
+            <tr><td>以自己為主角</td><td>伴侶會不會加薪？</td><td>我想增加家庭收入，該從哪裡著手？</td></tr>
+            <tr><td>根據真實狀況，不問假設</td><td>等我懷孕以後，他會不會變心？</td><td>我現在該怎麼經營這段關係？</td></tr>
+            <tr><td>以三個月內為主</td><td>我幾歲會遇到真命天子？</td><td>最近三個月我的桃花運勢如何？</td></tr>
+            <tr><td>真心想知道的事</td><td>隨口問、為了測試而問</td><td>你此刻最在意、最想釐清的那件事</td></tr>
+            <tr><td>用肯定句發問</td><td>我能不能升遷？</td><td>我要如何爭取升遷的機會？</td></tr>
+          </tbody>
+        </table>
+        <p class="muted small">交代背景與條件，比一句簡短的問題更能得到具體的解讀。</p>
+      </details>
+
+      <fieldset class="chips-field">
+        <legend class="field-label">時間範圍</legend>
+        <div class="chips" id="timeframeChips"></div>
+        <input id="fTimeframeCustom" class="input" placeholder="例如：這學期結束前" aria-label="自訂時間範圍" maxlength="30" hidden>
+        <p class="tip" id="timeframeTip" role="status" hidden></p>
+      </fieldset>
+
+      <section class="bg-quiz" id="bgQuiz" aria-labelledby="bgQuizTitle">
+        <h2 class="bg-quiz-title" id="bgQuizTitle">說說你的狀況</h2>
+        <div id="bgQuizBody"></div>
+      </section>
+
+      <div class="ai-tidy" id="aiTidy">
+        <button class="btn btn-ghost btn-block" type="button" id="openAi"><svg class="icon" aria-hidden="true"><use href="#i-sparkle"></use></svg>AI 幫我整理問題</button>
+        <p class="muted small">會參考上面的類別、問題和你的狀況，整理成 3 個更好的問法讓你挑選。</p>
+      </div>
+
+      <details class="more" id="moreInfo">
+        <summary>更多資訊（其他補充、性別、年齡）</summary>
+        <label class="field-label" for="fBackground">其他補充</label>
+        <textarea id="fBackground" class="input" data-field="background" rows="3" placeholder="問卷沒問到、但你覺得重要的事" maxlength="1000"></textarea>
+        <div class="field-grid">
+          <div>
+            <label class="field-label" for="fGender">性別</label>
+            <select id="fGender" class="input" data-field="gender">
+              <option value="">不提供</option>
+              <option>女性</option>
+              <option>男性</option>
+              <option>其他</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="fAge">年齡</label>
+            <input id="fAge" class="input" data-field="age" type="number" inputmode="numeric" min="1" max="120" placeholder="不提供">
+          </div>
+        </div>
+      </details>
+
+      <div class="actionbar">
+        <button class="btn btn-primary btn-block" type="button" id="toSpread">下一步：選牌陣</button>
+      </div>
+    </section>
+
+    <!-- ② 牌陣 -->
+    <section class="view" data-view="spread" hidden>
+      <div class="steps-slot"></div>
+      <div id="spreadView"></div>
+      <div class="actionbar">
+        <button class="btn btn-primary btn-block" type="button" id="toDraw">開始抽牌</button>
+      </div>
+    </section>
+
+    <!-- ③ 靜心與自動抽牌 -->
+    <section class="view view-draw" data-view="draw" hidden>
+      <div class="meditate">
+        <div class="breath" aria-hidden="true"><span></span></div>
+        <p class="meditate-title" id="drawTitle">請在心中默念你的問題</p>
+        <p class="meditate-question" id="drawQuestion"></p>
+        <p class="meditate-count" id="drawCount" aria-live="polite"></p>
+        <button class="btn btn-ghost" type="button" id="skipDraw">跳過 ›</button>
+      </div>
+    </section>
+
+    <!-- ③ 手動選牌 -->
+    <section class="view" data-view="pick" hidden>
+      <div class="steps-slot"></div>
+      <div id="pickView"></div>
+      <div class="actionbar">
+        <button class="btn btn-primary btn-block" type="button" id="finishPick" disabled>完成，產生 Prompt</button>
+      </div>
+    </section>
+
+    <!-- ④ 結果 -->
+    <section class="view view-wide" data-view="result" hidden>
+      <div class="steps-slot"></div>
+      <div id="resultView"></div>
+    </section>
+
+    <!-- 占卜紀錄 -->
+    <section class="view" data-view="history" hidden>
+      <h1 class="page-title">占卜紀錄</h1>
+      <p class="muted small">紀錄只存在這台裝置的瀏覽器，清除瀏覽資料或換裝置後就不會有。</p>
+      <div id="historyView"></div>
+    </section>
+
+    <!-- 找不到 -->
+    <section class="view" data-view="notfound" hidden>
+      <h1 class="page-title">找不到這筆紀錄</h1>
+      <p class="muted">它可能已經被刪除，或是存在另一台裝置上。</p>
+      <a class="btn btn-primary" href="#/">回首頁</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <button type="button" class="link-btn" data-info="disclaimer">免責聲明</button>
+    <span aria-hidden="true">・</span>
+    <button type="button" class="link-btn" data-info="privacy">隱私說明</button>
+    <span aria-hidden="true">・</span>
+    <button type="button" class="link-btn" data-info="credits">牌圖出處</button>
+  </footer>
+
+  <!-- 設定 -->
+  <dialog id="settingsDialog" class="dialog">
+    <form method="dialog" class="dialog-body" id="settingsForm">
+      <h2>設定</h2>
+      <h3>AI 問題整理</h3>
+      <p class="muted small">填入你自己的 OpenAI API key，按「✨ AI 幫我整理問題」時，網頁會直接呼叫 OpenAI。沒有 key 也能用免費的複製貼上方式。</p>
+      <ul class="small notes">
+        <li><strong>ChatGPT Plus 訂閱不包含 API key。</strong>API key 要另外到 platform.openai.com 申請並預先儲值，費用和 ChatGPT 月費分開計算。</li>
+        <li>key 只存在你的瀏覽器，費用由你的 OpenAI 帳戶支付。</li>
+        <li>你的問題會從瀏覽器直接送到 OpenAI，適用 OpenAI 的隱私政策。</li>
+        <li>不要在公用電腦上選「記住在這台裝置」。</li>
+        <li><strong>請自己備份 key。</strong>清除瀏覽資料（Cookie 和網站資料）、換瀏覽器或換裝置後，這裡記住的 key 就會不見；OpenAI 的 key 建立後只會完整顯示一次，沒備份就只能重新建立。建議存在密碼管理工具，不要存在一般的記事本或聊天紀錄裡。</li>
+      </ul>
+      <label class="field-label" for="sKey">OpenAI API key</label>
+      <div class="input-row">
+        <input id="sKey" class="input" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
+        <button class="btn btn-ghost" type="button" id="toggleKey" aria-pressed="false">顯示</button>
+      </div>
+      <fieldset class="radio-row">
+        <legend class="field-label">保存方式</legend>
+        <label><input type="radio" name="keyRemember" value="session" checked> 只用這一次（關閉分頁就清除）</label>
+        <label><input type="radio" name="keyRemember" value="local"> 記住在這台裝置</label>
+      </fieldset>
+      <label class="field-label" for="sModel">模型名稱</label>
+      <input id="sModel" class="input" list="modelList" spellcheck="false">
+      <datalist id="modelList"></datalist>
+      <p class="muted small">按「測試連線」會列出你的帳戶可用的模型。</p>
+      <p class="status-line" id="keyStatus" aria-live="polite"></p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" id="testKey">測試連線</button>
+        <button class="btn btn-ghost btn-danger" type="button" id="deleteKey">刪除 key</button>
+        <button class="btn btn-primary" type="button" id="saveSettings">儲存</button>
+      </div>
+      <button class="dialog-close" value="cancel" aria-label="關閉"><svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
+    </form>
+  </dialog>
+
+  <!-- AI 問題整理 -->
+  <dialog id="aiDialog" class="dialog">
+    <div class="dialog-body">
+      <h2><svg class="icon" aria-hidden="true"><use href="#i-sparkle"></use></svg> AI 幫我整理問題</h2>
+      <div id="aiBody"></div>
+      <button class="dialog-close" type="button" data-close aria-label="關閉"><svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
+    </div>
+  </dialog>
+
+  <!-- 補牌（手動模式選牌） -->
+  <dialog id="pickDialog" class="dialog dialog-tall">
+    <div class="dialog-body">
+      <h2>補一張指引牌</h2>
+      <div class="orient" id="pickDialogOrient"></div>
+      <div id="pickDialogPicker"></div>
+      <button class="dialog-close" type="button" data-close aria-label="關閉"><svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
+    </div>
+  </dialog>
+
+  <!-- 通用確認／說明 -->
+  <dialog id="choiceDialog" class="dialog">
+    <div class="dialog-body">
+      <h2 id="choiceTitle"></h2>
+      <div id="choiceMessage"></div>
+      <div class="dialog-actions" id="choiceButtons"></div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/cards.js"></script>
+  <script src="js/spreads.js"></script>
+  <script src="js/background.js"></script>
+  <script src="js/prompt.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

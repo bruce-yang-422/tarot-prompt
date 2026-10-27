@@ -1,0 +1,19 @@
+# Local API keys and environment secrets
+.key
+.env
+.env.*
+!.env.example
+
+# Local Python environment
+.venv/
+
+# 課程教材（有著作權）與版權有疑慮的舊圖片包，不上線
+米薩小姐的塔羅解答之書_課程筆記/
+images/rider-waite/
+scripts/download_tarot_178.py
+
+# 規劃文件，只留在本機
+Tarot_78張清單與矩陣.md
+Tarot_78張清單與矩陣_東方版.md
+塔羅解牌工具_需求問卷.md
+問牌Prompt_企劃書.md
