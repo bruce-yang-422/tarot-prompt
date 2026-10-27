@@ -1570,6 +1570,14 @@
   });
 
   const INFO = {
+    about: {
+      title: '關於本站',
+      message:
+        '<p><strong>問牌 Prompt</strong>｜塔羅抽牌與 AI 解牌 Prompt 產生器</p>' +
+        '<p>作者：<a href="https://github.com/bruce-yang-422" target="_blank" rel="noopener noreferrer" aria-label="Bruce Yang 的 GitHub（另開新分頁）">Bruce Yang ↗</a></p>' +
+        // 發布新版時同步更新此日期，避免將瀏覽日期誤當作最後更新日期。
+        '<p>最後更新日期：<time datetime="2026-10-27">2026 年 10 月 27 日</time></p>',
+    },
     disclaimer: {
       title: '免責聲明',
       message:

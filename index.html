@@ -56,7 +56,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=20261027b">
+  <link rel="stylesheet" href="css/style.css?v=20261027c">
 </head>
 <body>
   <!-- 自製 SVG 圖示：以 <svg class="icon"><use href="#i-名稱"></use></svg> 引用 -->
@@ -74,6 +74,7 @@
     <symbol id="i-star" viewBox="0 0 24 24"><path class="fill" d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5.5 6.5 6.5L9 18.5"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.6 5.6c.5-.1.9-.1 1.4-.1 6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.5M6.6 6.6C3.9 8.3 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.9 0 3.5-.6 4.9-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
@@ -253,12 +254,31 @@
   </main>
 
   <footer class="site-footer">
+    <div class="install-shortcut">
+      <button type="button" class="btn btn-ghost" id="installApp" aria-describedby="installHint"><svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>安裝成 App</button>
+      <p id="installHint" class="small muted" aria-live="polite">加入主畫面或桌面，下次一點就能開啟問牌。</p>
+    </div>
+    <div class="footer-links">
     <button type="button" class="link-btn" data-info="disclaimer">免責聲明</button>
     <span aria-hidden="true">・</span>
     <button type="button" class="link-btn" data-info="privacy">隱私說明</button>
     <span aria-hidden="true">・</span>
     <button type="button" class="link-btn" data-info="credits">牌圖出處</button>
+    <span aria-hidden="true">・</span>
+    <button type="button" class="link-btn" data-info="about">關於本站</button>
+    </div>
   </footer>
+
+  <dialog id="installDialog" class="dialog" aria-labelledby="installTitle">
+    <form method="dialog" class="dialog-body">
+      <h2 id="installTitle">安裝問牌 App</h2>
+      <p>將問牌加入主畫面或桌面，就能像 App 一樣快速開啟。</p>
+      <ol id="installSteps" class="notes"></ol>
+      <p class="small muted">離線可使用已快取的抽牌與 Prompt 功能；AI 服務需要網路連線。</p>
+      <div class="dialog-actions"><button class="btn btn-primary" value="close">知道了</button></div>
+      <button class="dialog-close" value="close" aria-label="關閉"><svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
+    </form>
+  </dialog>
 
   <!-- 設定 -->
   <dialog id="settingsDialog" class="dialog">
@@ -333,6 +353,7 @@
   <script src="js/prompt.js?v=20261027b"></script>
   <script src="js/storage.js?v=20261027b"></script>
   <script src="js/ai.js?v=20261027b"></script>
-  <script src="js/app.js?v=20261027b"></script>
+  <script src="js/app.js?v=20261027e"></script>
+  <script src="js/install.js?v=20261027c"></script>
 </body>
 </html>
