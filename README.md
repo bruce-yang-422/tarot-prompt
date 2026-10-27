@@ -1,3 +1,5 @@
+<p align="center"><img src="icons/logo-256.png" alt="問牌 Prompt 標誌" width="140"></p>
+
 # 問牌 Prompt（Tarot Prompt）
 
 **繁體中文** | [English](README.en.md)
@@ -96,6 +98,7 @@ OpenAI 串接是選用功能，每位使用者在自己的瀏覽器設定：
 ```text
 .
 ├── index.html            # 頁面結構、各畫面、SVG 圖示、SEO 標籤
+├── 404.html              # 自訂 404 頁（GitHub Pages 自動使用）
 ├── manifest.webmanifest  # PWA 設定
 ├── sw.js                 # Service Worker（離線快取）
 ├── robots.txt
@@ -111,7 +114,9 @@ OpenAI 串接是選用功能，每位使用者在自己的瀏覽器設定：
 │   ├── ai.js             # 呼叫 OpenAI：整理問題、追加背景問題
 │   └── app.js            # 路由、畫面與互動
 ├── images/rws-1909/      # 78 張牌圖與 manifest.json（來源與授權）
-├── icons/                # 網站圖示、PWA 圖示、社群分享預覽圖
+├── favicon.ico           # 瀏覽器分頁圖示
+├── icons/                # Logo 各尺寸、PWA 圖示、社群分享預覽圖
+│   └── source/           # Logo 原始檔（1000×1000）
 ├── docs/screenshots/     # README 用的截圖
 ├── README.en.md          # 英文版說明
 └── LICENSE               # MIT 授權

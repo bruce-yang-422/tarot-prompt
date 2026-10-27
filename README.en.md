@@ -1,3 +1,5 @@
+<p align="center"><img src="icons/logo-256.png" alt="Tarot Prompt logo" width="140"></p>
+
 # Tarot Prompt (問牌 Prompt)
 
 **English** | [繁體中文](README.md)
@@ -96,6 +98,7 @@ The site is static, so any static host works. For GitHub Pages:
 ```text
 .
 ├── index.html            # Markup, views, SVG icon sprite and SEO tags
+├── 404.html              # Custom 404 page (served automatically by GitHub Pages)
 ├── manifest.webmanifest  # PWA manifest
 ├── sw.js                 # Service worker (offline cache)
 ├── robots.txt
@@ -111,7 +114,9 @@ The site is static, so any static host works. For GitHub Pages:
 │   ├── ai.js             # OpenAI calls: refine question, follow-up questions
 │   └── app.js            # Routing, views and interactions
 ├── images/rws-1909/      # 78 card images + manifest.json (source and license)
-├── icons/                # Favicons, PWA icons and the social preview image
+├── favicon.ico           # Browser tab icon
+├── icons/                # Logo sizes, PWA icons and the social preview image
+│   └── source/           # Original logo artwork (1000×1000)
 ├── docs/screenshots/     # Images used in this README
 ├── README.md             # Traditional Chinese README
 └── LICENSE               # MIT License

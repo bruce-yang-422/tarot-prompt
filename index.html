@@ -27,7 +27,7 @@
   <meta name="twitter:image" content="https://tarot.stack-base.com/icons/og-image.jpg">
 
   <!-- 圖示與 PWA -->
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -61,7 +61,6 @@
 <body>
   <!-- 自製 SVG 圖示：以 <svg class="icon"><use href="#i-名稱"></use></svg> 引用 -->
   <svg class="sprite" aria-hidden="true" focusable="false">
-    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M19.5 14.2A8 8 0 1 1 9.8 4.5a6.3 6.3 0 0 0 9.7 9.7Z"/><path d="M17 3.5c.3 1.6 1 2.3 2.5 2.5-1.5.2-2.2.9-2.5 2.5-.3-1.6-1-2.3-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5Z"/></symbol>
     <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3.5" y="5" width="9" height="14" rx="1.5" transform="rotate(-12 8 12)"/><rect x="11.5" y="5" width="9" height="14" rx="1.5" transform="rotate(10 16 12)"/><path d="M16 9.2c.2 1.1.7 1.6 1.8 1.8-1.1.2-1.6.7-1.8 1.8-.2-1.1-.7-1.6-1.8-1.8 1.1-.2 1.6-.7 1.8-1.8Z"/></symbol>
     <symbol id="i-hand" viewBox="0 0 24 24"><rect x="8" y="2.5" width="9" height="12.5" rx="1.5"/><path d="M12.5 6.5v3M11 8h3"/><path d="M3.5 13.5 7 12a2 2 0 0 1 2.3.6l1.2 1.4h4.3a1.7 1.7 0 0 1 0 3.4H11"/><path d="M3.5 20.5h9.8a4 4 0 0 0 2.6-1l4.2-3.8a1.6 1.6 0 0 0-2.1-2.4l-2.5 2"/></symbol>
     <symbol id="i-history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4.5v3.8h3.8"/><path d="M12 8v4.2l2.8 1.8"/></symbol>
@@ -81,7 +80,7 @@
   <a class="skip-link" href="#app">跳到主要內容</a>
 
   <header class="topbar">
-    <a class="brand" href="#/"><svg class="icon brand-icon" aria-hidden="true"><use href="#i-logo"></use></svg>問牌 <span>Prompt</span></a>
+    <a class="brand" href="#/"><img class="brand-logo" src="icons/logo-128.png" alt="" width="30" height="30">問牌 <span>Prompt</span></a>
     <nav class="topnav" aria-label="主選單">
       <a class="topnav-btn" href="#/history"><svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>紀錄</a>
       <button class="topnav-btn" type="button" id="openSettings"><svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg>設定</button>
@@ -96,6 +95,7 @@
     <!-- 首頁預設顯示（不加 hidden），程式還沒執行時搜尋引擎也讀得到內容 -->
     <section class="view" data-view="home">
       <div class="hero">
+        <img class="hero-logo" src="icons/logo-256.png" alt="問牌 Prompt 標誌：兩張塔羅牌與星月" width="150" height="150">
         <h1>抽牌，然後讓 AI 解牌</h1>
         <p class="muted">輸入你的問題、抽出塔羅牌，這裡會整理出一份完整的解牌 Prompt，複製後貼到 ChatGPT、Claude 或 Gemini 就能得到解讀。</p>
       </div>
