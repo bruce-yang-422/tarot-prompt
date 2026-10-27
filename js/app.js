@@ -1491,7 +1491,7 @@
         };
         return;
       }
-      body.innerHTML = '<p>沒有抓到編號 1、2、3 的建議問題。請直接從 AI 的回覆複製你想要的那一句，貼到問題框。</p><button type="button" class="btn btn-ghost btn-block" data-close>關閉</button>';
+      body.innerHTML = '<p>沒有抓到建議問題。請確認貼上的是 AI 的完整回覆，或直接從 AI 的回覆複製你想要的那一句，貼到問題框。</p><button type="button" class="btn btn-ghost btn-block" data-close>關閉</button>';
       return;
     }
     const meta = [

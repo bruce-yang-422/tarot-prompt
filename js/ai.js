@@ -42,8 +42,8 @@
     } else {
       L.push('牌陣請從以下清單選：', T.SPREADS.map((s) => s.name).join('、'), '');
       L.push('如果我的描述太模糊、無法整理，請先問我一個問題釐清。');
-      L.push('請用以下格式回答：');
-      L.push('1. 建議問題', '   理由：為什麼這樣問比較好', '2. ……', '3. ……', '建議類別：……', '建議時間範圍：……', '建議牌陣：……');
+      L.push('請把整份回答放在一個程式碼區塊（```）裡，方便我直接複製，格式如下：');
+      L.push('1. 建議問題：……', '   理由：為什麼這樣問比較好', '2. ……', '3. ……', '建議類別：……', '建議時間範圍：……', '建議牌陣：……');
     }
     L.push('請用繁體中文回答。');
     return L.join('\n');
@@ -196,25 +196,103 @@
 
   const clean = (s) => s.replace(/\*\*|__|`/g, '').replace(/^[「『"“]|[」』"”]$/g, '').trim();
 
-  // 解析使用者從聊天介面貼回來的回覆：抓「1. 2. 3.」開頭的問題與其後的「理由」
+  // 解析使用者從聊天介面貼回來的回覆。各家 AI 的排版、用詞不一，複製時還可能掉編號，所以盡量寬鬆：
+  // - 編號：1. 1、 1) (1) （1） ① 一、 Q1 第1題，或編號自成一行，或完全沒有編號
+  // - 標籤：建議問題／問題1、理由／原因／說明、類別、時間範圍、牌陣
+  // - 也接受整段貼上 JSON（例如用了 JSON 格式的 Prompt）
+  const NUM = /^(?:[(（]\s*[0-9０-９一二三]\s*[)）]|[QqＱ]\s*[0-9０-９]\s*[.、．:：)）]?|[0-9０-９]\s*[.、．)）]|[一二三]\s*[、.．]|[①②③]|第\s*[0-9０-９一二三]\s*[題个個]\s*[:：、.．]?)\s*/;
+  const LABEL = {
+    question: /^(?:建議)?(?:的)?問題\s*[0-9０-９一二三]?\s*[:：]\s*/,
+    why: /^(?:理由|原因|說明|為什麼(?:這樣問)?(?:比較好)?)\s*[:：]\s*/,
+    category: /^(?:建議)?(?:的)?(?:問題)?類別\s*[:：]\s*/,
+    timeframe: /^(?:建議)?(?:的)?時間(?:範圍)?\s*[:：]\s*/,
+    spreads: /^(?:建議|適合)?(?:的)?牌陣\s*[:：]\s*/,
+  };
+  const INLINE_WHY = /\s*[（(]?\s*(?:理由|原因|說明)\s*[:：]\s*/;
+  const CATEGORY_ALIAS = { 愛情: '感情', 戀愛: '感情', 工作: '事業', 職場: '事業', 職涯: '事業', 財務: '財運', 金錢: '財運', 身體: '健康', 課業: '學業', 考試: '學業', 成長: '自我成長' };
+  const isQuestion = (s) => /[?？]$/.test(s);
+  const squash = (s) => s.replace(/\s+/g, '');
+
   function parseList(text) {
     const out = { followUp: '', questions: [], category: '', timeframe: '', spreads: [] };
-    const lines = (text || '').split(/\r?\n/);
-    lines.forEach((line) => {
-      const l = clean(line.replace(/^[\s>*-]+/, ''));
+    const raw = String(text || '')
+      .replace(/[​-‍﻿]/g, '')
+      .replace(/[ 　]/g, ' ');
+
+    // 整段是 JSON（可能包在 ``` 裡或前後有說明文字）
+    const json = raw.match(/\{[\s\S]*\}/);
+    if (json) {
+      try {
+        const res = normalize(json[0]);
+        if (res.questions.length) return res;
+      } catch (e) {
+        // 不是合法 JSON，當成一般文字繼續解析
+      }
+    }
+
+    const loose = []; // 沒有編號與標籤、但以問號結尾的行，最後備用
+    let pending = false; // 上一行只有編號，這一行就是問題
+    let lastQ = null; // 剛加入、還沒有理由的問題，用來接續下一行
+    const addQuestion = (s) => {
+      const [q, ...rest] = s.split(INLINE_WHY);
+      const textQ = clean(q.replace(LABEL.question, ''));
+      if (!textQ || out.questions.some((x) => x.text === textQ)) return (lastQ = null);
+      lastQ = { text: textQ, why: clean(rest.join(' ').replace(/[）)]$/, '')) };
+      out.questions.push(lastQ);
+      if (lastQ.why) lastQ = null;
+    };
+
+    raw.split(/\r?\n/).forEach((line) => {
+      if (/^\s*(```|~~~)/.test(line)) return; // 程式碼區塊的圍欄，例如 ```text
+      const l = clean(line.replace(/^[\s>*•·#-]+/, ''));
+      if (!l) {
+        lastQ = null;
+        return;
+      }
+      if (/^[0-9０-９]$/.test(l) || !l.replace(NUM, '')) {
+        pending = true;
+        lastQ = null;
+        return;
+      }
+      const body = clean(l.replace(NUM, ''));
+      const numbered = body !== l || pending;
+      pending = false;
       let m;
-      if ((m = l.match(/^(\d)\s*[.、．)）]\s*(.+)$/))) {
-        out.questions.push({ text: clean(m[2].replace(/^(建議)?問題[:：]\s*/, '')), why: '' });
-      } else if ((m = l.match(/^理由[:：]\s*(.+)$/)) && out.questions.length) {
-        out.questions[out.questions.length - 1].why = m[1].trim();
-      } else if ((m = l.match(/^建議類別[:：]\s*(.+)$/))) {
-        out.category = T.CATEGORIES.find((c) => m[1].includes(c)) || '';
-      } else if ((m = l.match(/^建議時間範圍[:：]\s*(.+)$/))) {
-        out.timeframe = m[1].trim();
-      } else if ((m = l.match(/^建議牌陣[:：]\s*(.+)$/))) {
-        out.spreads = T.SPREADS.filter((s) => m[1].includes(s.name)).map((s) => s.id);
+      if ((m = body.match(LABEL.category))) {
+        const v = body.slice(m[0].length);
+        out.category =
+          T.CATEGORIES.find((c) => v.includes(c)) ||
+          CATEGORY_ALIAS[Object.keys(CATEGORY_ALIAS).find((k) => v.includes(k))] ||
+          out.category;
+        lastQ = null;
+      } else if ((m = body.match(LABEL.timeframe))) {
+        out.timeframe = body.slice(m[0].length).replace(/[。.]$/, '').trim() || out.timeframe;
+        lastQ = null;
+      } else if ((m = body.match(LABEL.spreads))) {
+        const v = squash(body.slice(m[0].length));
+        const found = T.SPREADS.filter((s) => v.includes(squash(s.name)) || v.includes(s.id)).map((s) => s.id);
+        if (found.length) out.spreads = found;
+        lastQ = null;
+      } else if ((m = body.match(LABEL.why))) {
+        const q = out.questions[out.questions.length - 1];
+        if (q) q.why = q.why ? `${q.why} ${body.slice(m[0].length)}` : body.slice(m[0].length);
+        lastQ = null;
+      } else if (LABEL.question.test(body) || numbered) {
+        addQuestion(body);
+      } else if (lastQ) {
+        // 沒有標籤的下一行：問題已經以問號結尾，就當作理由；否則是問題被斷行，接回去
+        if (isQuestion(lastQ.text)) {
+          lastQ.why = body;
+          lastQ = null;
+        } else {
+          lastQ.text = clean(lastQ.text + body);
+        }
+      } else if (isQuestion(body)) {
+        loose.push(body);
       }
     });
+
+    if (!out.questions.length) loose.forEach(addQuestion);
     out.questions = out.questions.filter((q) => q.text).slice(0, 3);
     return out;
   }
