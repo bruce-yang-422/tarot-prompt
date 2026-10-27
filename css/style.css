@@ -331,7 +331,29 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field-error { color: var(--danger); margin: 6px 0 0; font-size: 0.875rem; }
 
-.input-row { display: flex; gap: 8px; }
+/* API key 輸入框：眼睛圖示放在框內右側 */
+.key-field { position: relative; }
+.key-field .input { padding-right: 52px; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+.key-toggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.key-toggle:hover { color: var(--gold-2); background: var(--surface-2); }
+/* 隱藏 Edge 內建的密碼顯示按鈕，避免和自己的眼睛圖示重複 */
+.key-field .input::-ms-reveal, .key-field .input::-ms-clear { display: none; }
+.key-toggle .icon { width: 20px; height: 20px; }
+.key-field + .radio-row { margin-top: 10px; }
 
 .check { display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 8px; cursor: pointer; }
 .check input { width: 20px; height: 20px; accent-color: var(--gold); }

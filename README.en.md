@@ -90,7 +90,7 @@ The site is static, so any static host works. For GitHub Pages:
 
 1. **Settings → Pages → Build and deployment**: deploy from branch `main`, folder `/ (root)`
 2. For a custom domain, set it under **Custom domain** (this commits the `CNAME` file) and point a DNS `CNAME` record at `<user>.github.io`
-3. After changing app shell files, bump `SHELL_CACHE` in `sw.js` so installed clients pick up the new version sooner
+3. After changing CSS or JS, update the `?v=` version in `index.html` and `404.html` (so CDN caches do not serve stale files) and bump `SHELL_CACHE` in `sw.js`
 4. When moving to another domain, also update the canonical and Open Graph URLs in `index.html`, `robots.txt` and `sitemap.xml`
 
 ## Project structure

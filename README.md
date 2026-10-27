@@ -90,7 +90,7 @@ OpenAI 串接是選用功能，每位使用者在自己的瀏覽器設定：
 
 1. **Settings → Pages → Build and deployment**：分支選 `main`、資料夾選 `/ (root)`
 2. 自訂網域：在 **Custom domain** 填入網域（會自動提交 `CNAME` 檔），DNS 加一筆 `CNAME` 指向 `<使用者>.github.io`
-3. 更新網站本身的檔案後，若要讓已安裝的使用者盡快拿到新版，把 `sw.js` 裡的 `SHELL_CACHE` 版本號加一
+3. 更新 CSS／JS 後，把 `index.html`、`404.html` 裡的 `?v=` 版本號換掉（避免 CDN 快取到舊檔），並把 `sw.js` 的 `SHELL_CACHE` 版本號加一
 4. 換網域時，記得一併修改 `index.html` 的 canonical／Open Graph 網址、`robots.txt` 與 `sitemap.xml`
 
 ## 專案結構

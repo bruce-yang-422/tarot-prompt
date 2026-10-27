@@ -1359,7 +1359,7 @@
     const key = T.store.getKey();
     $('#sKey').value = key;
     $('#sKey').type = 'password';
-    $('#toggleKey').textContent = '顯示';
+    setKeyVisible(false);
     $(`input[name="keyRemember"][value="${T.store.keyRemembered() ? 'local' : 'session'}"]`).checked = true;
     $('#sModel').value = settings.ai.model || T.ai.DEFAULT_MODEL;
     $('#keyStatus').textContent = keyStatusText();
@@ -1373,13 +1373,18 @@
     $('#saveSettings').click();
   });
 
-  $('#toggleKey').addEventListener('click', (e) => {
-    const input = $('#sKey');
-    const showing = input.type === 'text';
-    input.type = showing ? 'password' : 'text';
-    e.target.textContent = showing ? '顯示' : '隱藏';
-    e.target.setAttribute('aria-pressed', String(!showing));
-  });
+  // 輸入框右側的眼睛圖示：切換顯示或隱藏 API key
+  function setKeyVisible(visible) {
+    const btn = $('#toggleKey');
+    const label = visible ? '隱藏 API key' : '顯示 API key';
+    $('#sKey').type = visible ? 'text' : 'password';
+    btn.innerHTML = icon(visible ? 'eye-off' : 'eye');
+    btn.setAttribute('aria-pressed', String(visible));
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  }
+
+  $('#toggleKey').addEventListener('click', () => setKeyVisible($('#sKey').type === 'password'));
 
   $('#testKey').addEventListener('click', async () => {
     const key = $('#sKey').value.trim();
