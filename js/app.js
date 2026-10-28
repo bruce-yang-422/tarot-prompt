@@ -535,6 +535,12 @@
     } catch (err) {
       renderQuiz();
       toast(err.message, { timeout: 5000 });
+      if (err.code === 'format' && err.raw) {
+        const details = document.createElement('details');
+        details.className = 'tips';
+        details.innerHTML = `<summary>查看無法匯入的 AI 回覆</summary><pre class="raw">${esc(err.raw)}</pre>`;
+        $('#bgQuizBody').append(details);
+      }
     }
   }
 
@@ -1349,8 +1355,8 @@
 
   // ---------- 設定 ----------
 
-  function activeProvider() { return settings.ai.provider === 'google' ? 'google' : 'openai'; }
-  function savedAiModel(provider) { return provider === 'google' ? settings.ai.googleModel : settings.ai.model; }
+  function activeProvider() { return T.ai.providers.includes(settings.ai.provider) ? settings.ai.provider : 'openai'; }
+  function savedAiModel(provider) { return settings.ai[T.ai.providerInfo(provider).modelKey]; }
 
   T.setupAiSettings({ settings, icon, onSaved: () => {
     if (!view('ask').hidden) renderQuiz();
@@ -1488,7 +1494,7 @@
       <label class="field-label" for="aiPaste">AI 的回覆</label>
       <textarea id="aiPaste" class="input" rows="6" placeholder="把 AI 的回覆貼在這裡"></textarea>
       <button type="button" class="btn btn-ghost btn-block" id="aiParse">整理成建議</button>
-      <p class="muted small">有 OpenAI 或 Google AI Studio 的 key？到「⚙ 設定」填入即可一鍵整理。</p>`;
+      <p class="muted small">有 OpenAI、Google AI Studio 或 Claude 的 key？到「⚙ 設定」填入即可一鍵整理。</p>`;
     $('#aiCopy').onclick = async () => {
       const ok = await copyText(T.ai.buildPrompt(S.form, 'list'));
       toast(ok ? '已複製，貼到 AI 的對話框吧' : '複製失敗，請再試一次');
@@ -1528,7 +1534,7 @@
     privacy: {
       title: '隱私說明',
       message:
-        '<p>你的問題與占卜紀錄只存在你自己的瀏覽器。本網站沒有伺服器，不會收集任何資料。</p><p>使用 API 整理時，問題會直接送到你選擇的 OpenAI 或 Google，適用該服務的資料使用政策；Google 免費與付費額度的資料使用方式可能不同。複製 Prompt 貼到 AI 服務後，也適用該服務的隱私政策。</p>',
+        '<p>你的問題與占卜紀錄只存在你自己的瀏覽器。本網站沒有伺服器，不會收集任何資料。</p><p>使用 API 整理時，問題會直接送到你選擇的 OpenAI、Google 或 Anthropic（Claude），適用該服務的資料使用政策；Google 免費與付費額度的資料使用方式可能不同。複製 Prompt 貼到 AI 服務後，也適用該服務的隱私政策。</p>',
     },
   };
 

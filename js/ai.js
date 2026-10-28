@@ -1,11 +1,13 @@
-// AI 問題整理：由瀏覽器直接呼叫 OpenAI 或 Google Gemini；沒有 key 時改用複製貼上。
+// AI 問題整理：由瀏覽器直接呼叫 OpenAI、Google Gemini 或 Claude；沒有 key 時改用複製貼上。
 (function () {
   const T = (window.Tarot = window.Tarot || {});
   const API = 'https://api.openai.com/v1';
   const GOOGLE_API = 'https://generativelanguage.googleapis.com/v1beta';
+  const CLAUDE_API = 'https://api.anthropic.com/v1';
   const PROVIDERS = {
-    openai: { name: 'OpenAI', defaultModel: 'gpt-6-luna', keyLabel: 'OpenAI API key', placeholder: 'sk-...', pricingUrl: 'https://developers.openai.com/api/docs/pricing' },
-    google: { name: 'Google', defaultModel: 'gemini-3.5-flash-lite', keyLabel: 'Google AI Studio API key', placeholder: 'AIza...', pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing' },
+    openai: { name: 'OpenAI', modelKey: 'model', defaultModel: 'gpt-6-luna', keyLabel: 'OpenAI API key', placeholder: 'sk-...', pricingUrl: 'https://developers.openai.com/api/docs/pricing', keyUrl: 'https://platform.openai.com/api-keys', hint: 'API 費用另計，不包含在 ChatGPT 訂閱內。' },
+    google: { name: 'Google', modelKey: 'googleModel', defaultModel: 'gemini-3.5-flash-lite', keyLabel: 'Google AI Studio API key', placeholder: 'AIza...', pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing', keyUrl: 'https://aistudio.google.com/apikey', hint: '使用 Google AI Studio 的 key，額度與費用依 Google 帳戶為準。' },
+    claude: { name: 'Claude', modelKey: 'claudeModel', defaultModel: 'claude-haiku-5-5', keyLabel: 'Claude API key', placeholder: 'sk-ant-...', pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing', keyUrl: 'https://platform.claude.com/settings/keys', hint: '使用 Claude Console 的 key，API 費用與額度依帳戶為準。' },
   };
   const providerInfo = (provider) => PROVIDERS[provider] || PROVIDERS.openai;
   // 會先「思考」的模型（如 gpt-6-luna）實測約 5～10 秒，留餘裕
@@ -15,10 +17,13 @@
   const NOT_CHAT = /(?:^|-)(?:codex|pro|search|tts|transcribe|audio|realtime|image|instruct|embedding|moderation|deep-research)(?:-|$)/;
   // 已公告停用／已關閉的文字模型家族，查核官方 models/all 與 deprecations（2026-10-28）。
   const DEPRECATED_MODELS = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4.1', 'gpt-4.5', 'gpt-4o', 'chatgpt-4o', 'gpt-5', 'gpt-5.1', 'gpt-5.2-chat', 'gpt-5.3-chat', 'gpt-5.4-nano', 'o1', 'o3', 'o4-mini'];
+  const CLAUDE_DEPRECATED_MODELS = ['claude-1.0', 'claude-1.1', 'claude-1.2', 'claude-1.3', 'claude-instant', 'claude-2', 'claude-2.0', 'claude-2.1', 'claude-3', 'claude-sonnet-4-5', 'claude-sonnet-4-20250514', 'claude-sonnet-4-0', 'claude-opus-4-1', 'claude-opus-4-20250514', 'claude-opus-4-0', 'claude-mythos-preview'];
+  const claudeDeprecatedIds = new Set();
 
   function isDeprecatedModel(id, provider = 'openai') {
     const base = id.replace(/^models\//, '').replace(/^ft:/, '').split(':')[0];
-    const models = provider === 'google' ? ['gemini-1.0', 'gemini-1.5', 'gemini-2.0', 'gemini-3.1-flash-lite', 'gemini-3-pro-preview', 'gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-2.5-computer-use-preview'] : DEPRECATED_MODELS;
+    if (provider === 'claude' && claudeDeprecatedIds.has(base)) return true;
+    const models = provider === 'claude' ? CLAUDE_DEPRECATED_MODELS : provider === 'google' ? ['gemini-1.0', 'gemini-1.5', 'gemini-2.0', 'gemini-3.1-flash-lite', 'gemini-3-pro-preview', 'gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-2.5-computer-use-preview'] : DEPRECATED_MODELS;
     return models.some((model) => base === model || base.startsWith(model + '-'));
   }
   // 官方 Standard 短上下文費率（USD / 百萬 tokens），查核日期 2026-10-28。
@@ -31,14 +36,18 @@
   const GOOGLE_BUDGET_MODELS = [
     { id: 'gemini-3.5-flash-lite', label: '省錢・首選', input: 0.30, output: 2.50, freeTier: true },
   ];
+  // 官方 Standard 費率，短上下文（≤100K tokens），查核日期 2026-10-28。
+  const CLAUDE_BUDGET_MODELS = [
+    { id: 'claude-haiku-5-5', label: '省錢・首選', input: 0.10, output: 0.50 },
+  ];
+  const budgetFor = (provider) => provider === 'claude' ? CLAUDE_BUDGET_MODELS : provider === 'google' ? GOOGLE_BUDGET_MODELS : BUDGET_MODELS;
 
   function budgetModelInfo(id, provider = 'openai') {
-    const models = provider === 'google' ? GOOGLE_BUDGET_MODELS : BUDGET_MODELS;
-    return models.find((m) => id === m.id || (id.startsWith(m.id + '-') && /^\d{4}-\d{2}-\d{2}$/.test(id.slice(m.id.length + 1))));
+    return budgetFor(provider).find((m) => id === m.id || (id.startsWith(m.id + '-') && /^(?:\d{4}-\d{2}-\d{2}|\d{8})$/.test(id.slice(m.id.length + 1))));
   }
 
   function budgetModels(models, provider = 'openai') {
-    const budget = provider === 'google' ? GOOGLE_BUDGET_MODELS : BUDGET_MODELS;
+    const budget = budgetFor(provider);
     return budget.map((m) => models.includes(m.id) ? m.id : models.filter((id) => budgetModelInfo(id, provider) === m).sort().pop())
       .filter(Boolean);
   }
@@ -137,6 +146,7 @@
     format: 'AI 的回覆格式無法解析。',
     aborted: '已取消。',
     blocked: 'AI 未提供內容，請調整問題後再試，或改用複製貼上。',
+    incomplete: 'AI 回覆未完成，請稍後再試或改用其他模型。',
   };
 
   function withTimeout(signal) {
@@ -153,6 +163,7 @@
   // GET /v1/models 的錯誤回應有 CORS 標頭，瀏覽器讀得到 401，用來判斷 key 是否有效
   async function listModels(key, provider = 'openai') {
     if (provider === 'google') return listGoogleModels(key);
+    if (provider === 'claude') return listClaudeModels(key);
     let res;
     try {
       res = await fetch(API + '/models', { headers: { Authorization: 'Bearer ' + key } });
@@ -166,21 +177,21 @@
     return [...new Set((data.data || []).map((m) => m.id).filter((id) => typeof id === 'string' && /^(?:ft:)?(?:gpt-\d|chatgpt-\d|o\d)/.test(id) && !NOT_CHAT.test(id) && !isDeprecatedModel(id)))].sort();
   }
 
-  async function googleRequest(path, key, body, signal) {
+  async function requestJSON(base, name, headers, path, body, signal) {
     const t = withTimeout(signal);
     try {
-      const res = await fetch(GOOGLE_API + path, {
+      const res = await fetch(base + path, {
         method: body ? 'POST' : 'GET', signal: t.signal,
-        headers: { 'x-goog-api-key': key, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+        headers: { ...headers, ...(body ? { 'Content-Type': 'application/json' } : {}) },
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
       if (res.status === 401) throw new AiError('invalid', MESSAGES.invalid);
       if (res.status === 429) throw new AiError('quota', MESSAGES.quota);
-      if (res.status === 403) throw new AiError('rejected', 'Google 拒絕存取，請檢查 key 權限與 API 限制。');
+      if (res.status === 403) throw new AiError('rejected', `${name} 拒絕存取，請檢查 key 權限與 API 限制。`);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        const invalidKey = (data.error && data.error.details || []).some((d) => d.reason === 'API_KEY_INVALID');
-        throw new AiError(invalidKey ? 'invalid' : 'rejected', invalidKey ? MESSAGES.invalid : `Google 請求失敗（${res.status}），請檢查模型、key 與服務地區。`);
+        const invalidKey = data.error && (data.error.type === 'authentication_error' || (data.error.details || []).some((d) => d.reason === 'API_KEY_INVALID'));
+        throw new AiError(invalidKey ? 'invalid' : 'rejected', invalidKey ? MESSAGES.invalid : `${name} 請求失敗（${res.status}），請檢查模型、key 與服務設定。`);
       }
       return await res.json();
     } catch (err) {
@@ -188,6 +199,60 @@
       if (t.signal.aborted) throw new AiError(t.signal.reason === 'user' ? 'aborted' : 'timeout', MESSAGES[t.signal.reason === 'user' ? 'aborted' : 'timeout']);
       throw new AiError('network', MESSAGES.network);
     } finally { t.done(); }
+  }
+
+  const googleRequest = (path, key, body, signal) => requestJSON(GOOGLE_API, 'Google', { 'x-goog-api-key': key }, path, body, signal);
+  // 與官方 TypeScript SDK 的瀏覽器模式使用相同標頭；key 僅送往 Anthropic。
+  const claudeRequest = (path, key, body, signal) => requestJSON(CLAUDE_API, 'Claude', {
+    'x-api-key': key,
+    'anthropic-version': '2026-10-21',
+    'anthropic-dangerous-direct-browser-access': 'true',
+  }, path, body, signal);
+
+  async function listClaudeModels(key) {
+    const models = [];
+    const seen = new Set();
+    let cursor = '';
+    do {
+      const data = await claudeRequest('/models?limit=100' + (cursor ? '&after_id=' + encodeURIComponent(cursor) : ''), key);
+      for (const model of data.data || []) {
+        const id = model.id;
+        if (typeof id !== 'string' || !id.startsWith('claude-')) continue;
+        if (model.lifecycle === 'deprecated' || model.lifecycle === 'retired') claudeDeprecatedIds.add(id);
+        if ((!model.lifecycle || model.lifecycle === 'active') && !isDeprecatedModel(id, 'claude')
+          && !(model.capabilities && model.capabilities.structured_outputs && model.capabilities.structured_outputs.supported === false)) models.push(id);
+      }
+      if (!data.has_more) break;
+      cursor = data.last_id;
+      if (!cursor || seen.has(cursor)) throw new AiError('format', MESSAGES.format);
+      seen.add(cursor);
+    } while (cursor);
+    return [...new Set(models)].sort();
+  }
+
+  const objectSchema = (properties) => ({ type: 'object', properties, required: Object.keys(properties), additionalProperties: false });
+  const stringSchema = { type: 'string' };
+  const SUGGEST_SCHEMA = objectSchema({
+    followUp: stringSchema,
+    questions: { type: 'array', items: objectSchema({ text: stringSchema, why: stringSchema }) },
+    category: stringSchema, timeframe: stringSchema, spreads: { type: 'array', items: stringSchema },
+  });
+  const QUIZ_SCHEMA = objectSchema({ questions: { type: 'array', items: objectSchema({
+    label: stringSchema, type: { type: 'string', enum: ['single', 'multi', 'text'] },
+    options: { type: 'array', items: stringSchema }, placeholder: stringSchema,
+  }) } });
+
+  async function claudeJSON({ key, model, prompt, signal, schema }) {
+    const data = await claudeRequest('/messages', key, {
+      model: model || PROVIDERS.claude.defaultModel, max_tokens: 4096,
+      messages: [{ role: 'user', content: prompt }],
+      output_config: { format: { type: 'json_schema', schema } },
+    }, signal);
+    if (data.stop_reason === 'max_tokens') throw new AiError('incomplete', MESSAGES.incomplete);
+    if (data.stop_reason !== 'end_turn' || data.stop_details && data.stop_details.type === 'refusal') throw new AiError('blocked', MESSAGES.blocked);
+    const text = (data.content || []).filter((part) => part.type === 'text' && typeof part.text === 'string').map((part) => part.text).join('');
+    if (!text.trim()) throw new AiError('blocked', MESSAGES.blocked);
+    return text;
   }
 
   async function listGoogleModels(key) {
@@ -209,13 +274,14 @@
     return [...new Set(models)].sort();
   }
 
-  async function googleJSON({ key, model, prompt, signal }) {
+  async function googleJSON({ key, model, prompt, signal, schema }) {
     const id = (model || PROVIDERS.google.defaultModel).replace(/^models\//, '');
     const data = await googleRequest('/models/' + encodeURIComponent(id) + ':generateContent', key, {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: 'application/json' },
+      generationConfig: { responseMimeType: 'application/json', responseJsonSchema: schema },
     }, signal);
     const candidate = (data.candidates || [])[0];
+    if (candidate && candidate.finishReason === 'MAX_TOKENS') throw new AiError('incomplete', MESSAGES.incomplete);
     if (data.promptFeedback && data.promptFeedback.blockReason || !candidate || (candidate.finishReason && candidate.finishReason !== 'STOP')) {
       throw new AiError('blocked', MESSAGES.blocked);
     }
@@ -225,8 +291,9 @@
   }
 
   // 呼叫 OpenAI，要求回傳 JSON，回傳 JSON 文字內容
-  async function chatJSON({ key, model, prompt, signal, provider = 'openai' }) {
-    if (provider === 'google') return googleJSON({ key, model, prompt, signal });
+  async function chatJSON({ key, model, prompt, signal, schema, provider = 'openai' }) {
+    if (provider === 'google') return googleJSON({ key, model, prompt, signal, schema });
+    if (provider === 'claude') return claudeJSON({ key, model, prompt, signal, schema });
     const t = withTimeout(signal);
     let res;
     try {
@@ -260,7 +327,20 @@
 
   function parseJSON(content) {
     try {
-      return JSON.parse(content);
+      let text = String(content || '').replace(/^\uFEFF/, '').trim();
+      const fenced = text.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?```$/i);
+      if (fenced) text = fenced[1].trim();
+      let obj;
+      try { obj = JSON.parse(text); }
+      catch (err) {
+        // 可容忍 JSON 外的簡短說明，不修補截斷、逗號或引號，也不猜測缺少的資料。
+        const fragment = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+        if (!fragment) throw err;
+        obj = JSON.parse(fragment[0]);
+      }
+      if (typeof obj === 'string') obj = JSON.parse(obj);
+      if (!obj || typeof obj !== 'object') throw new Error('Expected JSON object or array');
+      return obj;
     } catch (e) {
       const err = new AiError('format', MESSAGES.format);
       err.raw = content;
@@ -272,7 +352,7 @@
     if (signal && signal.aborted) throw new AiError('aborted', MESSAGES.aborted);
     const followUp = clarify(form);
     if (followUp) return followUp;
-    return normalize(await chatJSON({ key, model, prompt: buildPrompt(form, 'json'), signal, provider }));
+    return normalize(await chatJSON({ key, model, prompt: buildPrompt(form, 'json'), signal, provider, schema: SUGGEST_SCHEMA }));
   }
 
   // 依問題與已回答的背景問卷，請 AI 補問 2～3 題（選擇題或簡答），格式與背景小問卷相同
@@ -297,28 +377,45 @@
       '1. 優先用選擇題（single 單選或 multi 複選），每題 3～6 個簡短選項；真的無法列選項時才用 text 簡答',
       '2. 題目要具體貼合這個問題，用繁體中文，口吻溫和',
       '3. 不要問敏感的個人資料（姓名、電話、地址、身分證）',
+      '4. 沒有值得追加的問題時回傳 {"questions":[]}，不要為了湊數重複已問過的題目',
       '只回傳 JSON，格式如下：',
       '{"questions":[{"label":"題目","type":"single","options":["選項1","選項2"],"placeholder":""}]}',
     ]
       .filter((l) => l !== '')
       .join('\n');
-    const obj = parseJSON(await chatJSON({ key, model, prompt, signal, provider }));
-    const list = (Array.isArray(obj.questions) ? obj.questions : [])
+    const obj = parseJSON(await chatJSON({ key, model, prompt, signal, provider, schema: QUIZ_SCHEMA }));
+    const source = Array.isArray(obj) ? obj : obj.questions;
+    if (!Array.isArray(source)) {
+      if (typeof obj.followUp === 'string' && obj.followUp.trim()) throw new AiError('context', obj.followUp.trim());
+      const err = new AiError('format', MESSAGES.format);
+      err.raw = JSON.stringify(obj, null, 2);
+      throw err;
+    }
+    if (!source.length) throw new AiError('no_questions', '這次沒有追加問題；可補充狀況後再試。');
+    const textOf = (value) => typeof value === 'string' ? value.trim() : '';
+    const list = source.filter((q) => q && (typeof q === 'object' || typeof q === 'string'))
       .map((q, i) => {
+        if (typeof q === 'string') q = { label: q, type: 'text' };
         const type = ['single', 'multi', 'text'].includes(q.type) ? q.type : 'text';
-        const options = (Array.isArray(q.options) ? q.options : []).map((o) => String(o).trim()).filter(Boolean).slice(0, 6);
+        const options = [...new Set((Array.isArray(q.options) ? q.options : [])
+          .map((o) => textOf(o) || (o && typeof o === 'object' ? textOf(o.label) || textOf(o.text) || textOf(o.value) : ''))
+          .filter(Boolean))].slice(0, 6);
         return {
           id: 'ai' + (i + 1),
           ai: true,
-          label: String(q.label || '').trim(),
+          label: textOf(q.label) || textOf(q.question) || textOf(q.text),
           type: type !== 'text' && options.length < 2 ? 'text' : type,
           options,
-          placeholder: String(q.placeholder || '').trim(),
+          placeholder: textOf(q.placeholder),
         };
       })
       .filter((q) => q.label)
       .slice(0, 3);
-    if (!list.length) throw new AiError('format', MESSAGES.format);
+    if (!list.length) {
+      const err = new AiError('format', MESSAGES.format);
+      err.raw = JSON.stringify(obj, null, 2);
+      throw err;
+    }
     return list;
   }
 
@@ -455,6 +552,7 @@
   T.ai = {
     DEFAULT_MODEL: 'gpt-6-luna',
     providerInfo,
+    providers: Object.keys(PROVIDERS),
     clarify,
     budgetModelInfo,
     budgetModels,

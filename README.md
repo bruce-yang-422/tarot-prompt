@@ -39,7 +39,7 @@
 - **占卜紀錄**存在瀏覽器
 - **選用的 AI 輔助**
   - 沒有 API key：複製「整理問題 Prompt」到任何 AI，再把回覆貼回來
-  - 有自己的 OpenAI 或 Google AI Studio API key：直接整理問題、追加背景問題（預設模型分別為 `gpt-6-luna`、`gemini-3.5-flash-lite`）
+  - 有自己的 OpenAI、Google AI Studio 或 Claude API key：直接整理問題、追加背景問題；預設只列出推薦的省錢模型（`gpt-6-luna`、`gpt-5.6-luna`、`gemini-3.5-flash-lite`、`claude-haiku-5-5`），勾選「顯示全部模型」可查看其餘模型與自訂 ID
 - **PWA**：可「加到主畫面」當成 App 使用；第一次開啟時會在背景下載整個網站（約 16MB，含 78 張牌圖），之後完全離線也能使用
 - **SEO**：Open Graph／Twitter 分享預覽、JSON-LD 結構化資料、`sitemap.xml`、`robots.txt`
 - **無障礙**：可用鍵盤操作、`aria-live` 通知、遵循「減少動態效果」設定
@@ -75,15 +75,16 @@ python -m http.server 8000
 API 串接是選用功能，每位使用者在自己的瀏覽器設定：
 
 1. 點頂端列的「設定」
-2. 在「管理 API keys」點各家的「新增 key」或「編輯」，填入 key 並選擇保存方式；每列也可單獨刪除
-3. 上方「使用模型」會合併列出已填 key 的供應商回傳的文字模型，標示供應商與省錢選項；可按「更新模型」重新載入
+2. 在「管理 API keys」點 OpenAI、Google 或 Claude 的「新增 key」或「編輯」，填入 key 並選擇保存方式；每列也可單獨刪除，編輯區提供申請連結
+3. 上方「使用模型」合併各家推薦模型，標示供應商；勾選「顯示全部模型」可查看其他文字模型與自訂 ID，也可按「更新模型」重新載入
 4. 選擇要使用的模型並「儲存」，套用新增／編輯的 key。刪除 key 立即生效；實際呼叫由模型選擇決定，編輯 key 不會切換使用中的服務
 
 注意：
 
 - ChatGPT Plus 訂閱不包含 API；API key 要另外到 [platform.openai.com](https://platform.openai.com) 申請並計費。
 - Google 的 key 可從 [Google AI Studio](https://aistudio.google.com/apikey) 取得；額度、計費與資料使用依 Google 帳戶方案為準。
-- key 只會送往所選服務的 `api.openai.com` 或 `generativelanguage.googleapis.com`，不經過本站伺服器。
+- Claude 的 key 可從 [Claude Console](https://platform.claude.com/settings/keys) 取得；API 費用與額度依 Console 帳戶為準。
+- key 只會送往所選服務的 `api.openai.com`、`generativelanguage.googleapis.com` 或 `api.anthropic.com`，不經過本站伺服器。
 - 清除瀏覽資料會刪除記住的 key，請自行備份。Google 免費與付費額度的資料使用政策不同，詳見[官方價格與資料使用說明](https://ai.google.dev/gemini-api/docs/pricing)。
 
 ## 部署
@@ -113,7 +114,7 @@ API 串接是選用功能，每位使用者在自己的瀏覽器設定：
 │   ├── background.js     # 背景小問卷題目
 │   ├── prompt.js         # 牌面統計、問題提示、Prompt 產生
 │   ├── storage.js        # 紀錄、草稿、設定、API key 的儲存
-│   ├── ai.js             # 呼叫 OpenAI／Google：整理問題、追加背景問題
+│   ├── ai.js             # 呼叫 OpenAI／Google／Claude：整理問題、追加背景問題
 │   ├── settings.js       # API key 管理、混合供應商模型清單
 │   └── app.js            # 路由、畫面與互動
 ├── images/rws-1909/      # 78 張牌圖與 manifest.json（來源與授權）

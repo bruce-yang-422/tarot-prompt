@@ -1,9 +1,9 @@
 // API key 管理與跨供應商模型清單。管理 key 的供應商，不決定實際使用的模型。
 (function () {
   const T = window.Tarot;
-  const PROVIDERS = ['openai', 'google'];
+  const PROVIDERS = T.ai.providers;
   const CUSTOM = '__custom__';
-  const modelKey = (provider) => provider === 'google' ? 'googleModel' : 'model';
+  const modelKey = (provider) => T.ai.providerInfo(provider).modelKey;
   const valueOf = (provider, model) => JSON.stringify([provider, model]);
 
   T.setupAiSettings = function ({ settings, icon, onSaved }) {
@@ -27,7 +27,7 @@
     }
 
     function updateActiveLabel() {
-      const provider = settings.ai.provider === 'google' ? 'google' : 'openai';
+      const provider = PROVIDERS.includes(settings.ai.provider) ? settings.ai.provider : 'openai';
       const label = $('#activeAiModel');
       label.hidden = !T.store.getKey(provider);
       label.textContent = `目前使用：${T.ai.providerInfo(provider).name} · ${savedModel(provider)}`;
@@ -77,7 +77,9 @@
       const custom = selected && selected.model === CUSTOM;
       $('#customModelField').hidden = !custom;
       if (!selected) {
-        $('#modelHint').textContent = '填入 key 後載入模型；選模型即可決定使用哪一家。';
+        $('#modelHint').textContent = choice && !$('#showAllModels').checked && !T.ai.budgetModelInfo(choice.model, choice.provider)
+          ? '原選模型在完整清單中；請勾選「顯示全部模型」，或改選推薦模型。'
+          : '填入 key 後載入模型；選模型即可決定使用哪一家。';
         $('#modelPricing').hidden = true;
         return;
       }
@@ -103,7 +105,8 @@
         const info = T.ai.providerInfo(provider);
         const group = document.createElement('optgroup');
         group.label = info.name;
-        const models = [...draft.models].sort((a, b) => {
+        const showAll = $('#showAllModels').checked;
+        const models = (showAll ? [...draft.models] : T.ai.budgetModels(draft.models, provider)).sort((a, b) => {
           const budget = Number(!!T.ai.budgetModelInfo(b, provider)) - Number(!!T.ai.budgetModelInfo(a, provider));
           return budget || a.localeCompare(b);
         });
@@ -112,12 +115,17 @@
           group.append(new Option(`${info.name} · ${id}${budget ? '（省錢）' : /preview|exp/.test(id) ? '（預覽）' : ''}`, valueOf(provider, id)));
         }
         // 先前明確儲存的自訂 ID 仍可使用，但不冒充 API 已回傳的模型。
-        if (draft.state === 'ready' && draft.model && !models.includes(draft.model) && !T.ai.isDeprecatedModel(draft.model, provider)) {
+        if (showAll && draft.state === 'ready' && draft.model && !models.includes(draft.model) && !T.ai.isDeprecatedModel(draft.model, provider)) {
           group.append(new Option(`${info.name} · ${draft.model}（自訂）`, valueOf(provider, draft.model)));
         }
-        group.append(new Option(`${info.name} · 自訂模型…`, valueOf(provider, CUSTOM)));
+        if (showAll) group.append(new Option(`${info.name} · 自訂模型…`, valueOf(provider, CUSTOM)));
+        if (!group.children.length) {
+          const empty = new Option('無推薦型號，可勾選「顯示全部模型」', '');
+          empty.disabled = true;
+          group.append(empty);
+        }
         select.append(group);
-        statuses.push(`${info.name}：${draft.state === 'loading' ? '載入中…' : draft.state === 'ready' ? models.length + ' 個模型' : draft.state === 'error' ? draft.error : '請更新模型'}`);
+        statuses.push(`${info.name}：${draft.state === 'loading' ? '載入中…' : draft.state === 'ready' ? showAll ? models.length + ' 個模型' : models.length + ' 個推薦' : draft.state === 'error' ? draft.error : '請更新模型'}`);
       }
       select.disabled = !PROVIDERS.some((provider) => drafts[provider] && drafts[provider].key);
       if (select.disabled) select.options[0].textContent = '請先填入 API key';
@@ -154,7 +162,8 @@
       $('#sKey').value = draft.key;
       setKeyVisible(false);
       $(`input[name="keyRemember"][value="${draft.remember ? 'local' : 'session'}"]`).checked = true;
-      $('#providerHint').textContent = provider === 'google' ? '使用 Google AI Studio 的 key，額度與費用依 Google 帳戶為準。' : 'API 費用另計，不包含在 ChatGPT 訂閱內。';
+      $('#providerHint').textContent = info.hint;
+      $('#keyHelpLink').href = info.keyUrl;
       $('#keyStatus').textContent = draft.key ? `${info.name} key 已填入` : `尚未填入 ${info.name} key`;
       renderKeyList();
     }
@@ -189,8 +198,10 @@
         key: T.store.getKey(provider), remember: T.store.keyRemembered(provider),
         model: settings.ai[modelKey(provider)] || '', models: [], state: 'idle', error: '', request: 0,
       }]));
-      const provider = settings.ai.provider === 'google' ? 'google' : 'openai';
+      const provider = PROVIDERS.includes(settings.ai.provider) ? settings.ai.provider : 'openai';
       choice = { provider, model: savedModel(provider) };
+      $('#showAllModels').checked = settings.ai.showAllModels === undefined
+        ? !!(drafts[provider].key && !T.ai.budgetModelInfo(choice.model, provider)) : !!settings.ai.showAllModels;
       $('#keyEditor').hidden = true;
       loadKey(provider);
       $('#sModelCustom').value = '';
@@ -200,6 +211,7 @@
       Promise.allSettled(PROVIDERS.filter((id) => drafts[id].key).map(fetchModels));
     });
     dialog.addEventListener('close', () => { generation++; });
+    $('#showAllModels').addEventListener('change', renderModelChoices);
 
     $('#apiKeyList').addEventListener('click', (event) => {
       const edit = event.target.closest('[data-key-edit]');
@@ -298,6 +310,7 @@
         settings.ai.provider = selected.provider;
         settings.ai[modelKey(selected.provider)] = model === T.ai.providerInfo(selected.provider).defaultModel ? '' : model;
       }
+      settings.ai.showAllModels = $('#showAllModels').checked;
       T.store.saveSettings({ ai: settings.ai });
       updateActiveLabel();
       dialog.close();

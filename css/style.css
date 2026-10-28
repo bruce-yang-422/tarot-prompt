@@ -1100,6 +1100,8 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .api-key-actions { display: flex; gap: 6px; flex: none; }
 .api-key-actions .btn { padding: 5px 9px; font-size: 12px; }
 .key-editor { margin-top: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg-2); }
+.key-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.key-label-row a { font-size: 12px; white-space: nowrap; }
 .key-editor-end { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
 .key-backup-note { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; padding: 10px 12px; border: 1px solid #bfa16a66; border-left: 3px solid var(--gold); border-radius: 6px; background: #bfa16a12; font-size: 12px; }
 .key-backup-note > .icon { margin-top: 2px; color: var(--gold-2); }

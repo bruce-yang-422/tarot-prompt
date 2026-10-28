@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src https://api.openai.com https://generativelanguage.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src https://api.openai.com https://generativelanguage.googleapis.com https://api.anthropic.com; object-src 'none'; base-uri 'none'; form-action 'none';">
   <title>問牌 Prompt｜塔羅抽牌與 AI 解牌 Prompt 產生器</title>
   <meta name="description" content="免費線上塔羅抽牌，或輸入你手上實體牌的結果。16 種牌陣、1909 年原版偉特牌圖，自動整理成完整的解牌 Prompt，一鍵複製到 ChatGPT、Claude、Gemini 讓 AI 幫你解牌。">
   <meta name="keywords" content="塔羅牌,線上抽牌,塔羅占卜,AI 解牌,ChatGPT 塔羅,解牌 Prompt,偉特塔羅,凱爾特十字,tarot,tarot prompt">
@@ -56,7 +56,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=20261028j">
+  <link rel="stylesheet" href="css/style.css?v=20261028k">
 </head>
 <body>
   <!-- 自製 SVG 圖示：以 <svg class="icon"><use href="#i-名稱"></use></svg> 引用 -->
@@ -294,6 +294,7 @@
       <div class="settings-section">
         <label class="field-label" for="sModel">使用模型</label>
         <select id="sModel" class="input" name="tarot-model-choice" aria-describedby="modelHint modelListStatus"></select>
+        <label class="check small"><input id="showAllModels" type="checkbox">顯示全部模型（含自訂）</label>
         <p class="muted small" id="modelListStatus" aria-live="polite"></p>
         <div id="customModelField" hidden>
           <label class="field-label" for="sModelCustom" id="customModelLabel">自訂模型 ID</label>
@@ -309,7 +310,10 @@
         <div id="keyEditor" class="key-editor" hidden>
         <input id="sProvider" type="hidden" name="tarot-api-provider" value="openai">
         <p class="muted small" id="providerHint">API 費用另計，不包含在 ChatGPT 訂閱內。</p>
-        <label class="field-label" for="sKey" id="keyLabel">OpenAI API key</label>
+        <div class="key-label-row">
+          <label class="field-label" for="sKey" id="keyLabel">OpenAI API key</label>
+          <a id="keyHelpLink" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">申請 key ↗</a>
+        </div>
         <div class="key-field">
           <input id="sKey" class="input" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
           <button class="key-toggle" type="button" id="toggleKey" aria-pressed="false" aria-label="顯示 API key" title="顯示 API key"><svg class="icon" aria-hidden="true"><use href="#i-eye"></use></svg></button>
@@ -372,10 +376,10 @@
   <script src="js/spreads.js?v=20261027b"></script>
   <script src="js/background.js?v=20261027b"></script>
   <script src="js/prompt.js?v=20261027b"></script>
-  <script src="js/storage.js?v=20261028a"></script>
-  <script src="js/ai.js?v=20261028f"></script>
-  <script src="js/settings.js?v=20261028b"></script>
-  <script src="js/app.js?v=20261028g"></script>
+  <script src="js/storage.js?v=20261028b"></script>
+  <script src="js/ai.js?v=20261028h"></script>
+  <script src="js/settings.js?v=20261028d"></script>
+  <script src="js/app.js?v=20261028i"></script>
   <script src="js/install.js?v=20261027c"></script>
 </body>
 </html>

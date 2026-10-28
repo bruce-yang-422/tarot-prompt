@@ -50,8 +50,8 @@
     delete memory[key];
   }
 
-  const DEFAULT_SETTINGS = { tone: 'gentle', length: 'standard', uprightOnly: false, ai: { provider: 'openai', model: '', googleModel: '' } };
-  const keyName = (provider) => provider === 'google' ? 'apiKey.google' : 'apiKey';
+  const DEFAULT_SETTINGS = { tone: 'gentle', length: 'standard', uprightOnly: false, ai: { provider: 'openai', model: '', googleModel: '', claudeModel: '' } };
+  const keyName = (provider) => provider === 'claude' ? 'apiKey.claude' : provider === 'google' ? 'apiKey.google' : 'apiKey';
 
   T.store = {
     available: localOk,
