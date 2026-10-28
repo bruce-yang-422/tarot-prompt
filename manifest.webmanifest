@@ -8,8 +8,8 @@
   "scope": "./",
   "id": "./",
   "display": "standalone",
-  "background_color": "#0e0c1d",
-  "theme_color": "#0e0c1d",
+  "background_color": "#100e18",
+  "theme_color": "#100e18",
   "categories": ["lifestyle", "entertainment"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

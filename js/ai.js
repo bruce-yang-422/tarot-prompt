@@ -22,8 +22,9 @@
   // format: 'json' 給 API 用；'list' 給使用者複製到聊天介面用
   function buildPrompt(form, format) {
     const L = [
-      '你是一位塔羅提問教練。請把我描述的狀況，整理成適合拿來抽塔羅牌的問題。',
-      '你只負責整理問題，不要占卜，也不要回答問題本身。',
+      '請協助我做文字整理：把下方的生活情境，改寫成 3 個以我自己為主角、可以用來自我反思的開放式問題。',
+      '這些問題之後會用在塔羅自我探索活動；本次只需改寫問題，並依主題選擇牌陣名稱，不需要抽牌、解牌、預測未來或回答問題本身。',
+      '如果情境涉及健康、心理、法律或財務，請聚焦於我的感受、需求與可採取的行動，不做診斷、治療建議或專業判斷。',
       ...(form.category ? ['', `【想問的方向】${form.category}（整理出的問題請聚焦在這個方向）`] : []),
       '',
       '【我的狀況】',
@@ -40,10 +41,10 @@
       L.push('只回傳 JSON，格式如下：');
       L.push('{"followUp":"","questions":[{"text":"建議問題","why":"為什麼這樣問比較好"}],"category":"類別","timeframe":"時間範圍","spreads":["牌陣 id"]}');
     } else {
-      L.push('牌陣請從以下清單選：', T.SPREADS.map((s) => s.name).join('、'), '');
+      L.push('牌陣請依探索主題從以下清單選一個，不代表預測或專業評估：', spreadList(), '');
       L.push('如果我的描述太模糊、無法整理，請先問我一個問題釐清。');
-      L.push('請把整份回答放在一個程式碼區塊（```）裡，方便我直接複製，格式如下：');
-      L.push('1. 建議問題：……', '   理由：為什麼這樣問比較好', '2. ……', '3. ……', '建議類別：……', '建議時間範圍：……', '建議牌陣：……');
+      L.push('資訊足夠時，請把整份回答放在一個程式碼區塊（```text）裡，方便我直接複製。只輸出以下 9 行，每個標籤與內容放在同一行，不另加選擇理由或最推薦題目：');
+      L.push('1. 建議問題：……', '理由：……', '2. 建議問題：……', '理由：……', '3. 建議問題：……', '理由：……', '建議類別：……', '建議時間範圍：……', '建議牌陣：……（填清單中的完整名稱，不填 id）');
     }
     L.push('請用繁體中文回答。');
     return L.join('\n');
@@ -233,12 +234,19 @@
     const loose = []; // 沒有編號與標籤、但以問號結尾的行，最後備用
     let pending = false; // 上一行只有編號，這一行就是問題
     let lastQ = null; // 剛加入、還沒有理由的問題，用來接續下一行
+    let reasonQ = null; // 可接收「理由」的問題；跨空行保留，讀完理由或進入建議摘要就清除
     const addQuestion = (s) => {
       const [q, ...rest] = s.split(INLINE_WHY);
       const textQ = clean(q.replace(LABEL.question, ''));
-      if (!textQ || out.questions.some((x) => x.text === textQ)) return (lastQ = null);
+      if (!textQ) {
+        pending = true; // 「建議問題：」與實際題目可能隔著換行或空行
+        lastQ = reasonQ = null;
+        return;
+      }
+      if (out.questions.some((x) => x.text === textQ)) return (lastQ = reasonQ = null);
       lastQ = { text: textQ, why: clean(rest.join(' ').replace(/[）)]$/, '')) };
       out.questions.push(lastQ);
+      reasonQ = lastQ.why ? null : lastQ;
       if (lastQ.why) lastQ = null;
     };
 
@@ -264,26 +272,26 @@
           T.CATEGORIES.find((c) => v.includes(c)) ||
           CATEGORY_ALIAS[Object.keys(CATEGORY_ALIAS).find((k) => v.includes(k))] ||
           out.category;
-        lastQ = null;
+        lastQ = reasonQ = null;
       } else if ((m = body.match(LABEL.timeframe))) {
         out.timeframe = body.slice(m[0].length).replace(/[。.]$/, '').trim() || out.timeframe;
-        lastQ = null;
+        lastQ = reasonQ = null;
       } else if ((m = body.match(LABEL.spreads))) {
         const v = squash(body.slice(m[0].length));
         const found = T.SPREADS.filter((s) => v.includes(squash(s.name)) || v.includes(s.id)).map((s) => s.id);
         if (found.length) out.spreads = found;
-        lastQ = null;
+        lastQ = reasonQ = null;
       } else if ((m = body.match(LABEL.why))) {
-        const q = out.questions[out.questions.length - 1];
+        const q = reasonQ;
         if (q) q.why = q.why ? `${q.why} ${body.slice(m[0].length)}` : body.slice(m[0].length);
-        lastQ = null;
+        lastQ = reasonQ = null;
       } else if (LABEL.question.test(body) || numbered) {
         addQuestion(body);
       } else if (lastQ) {
         // 沒有標籤的下一行：問題已經以問號結尾，就當作理由；否則是問題被斷行，接回去
         if (isQuestion(lastQ.text)) {
           lastQ.why = body;
-          lastQ = null;
+          lastQ = reasonQ = null;
         } else {
           lastQ.text = clean(lastQ.text + body);
         }

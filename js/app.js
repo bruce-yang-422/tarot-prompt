@@ -1559,7 +1559,12 @@
     $('#aiParse').onclick = () => {
       const text = $('#aiPaste').value.trim();
       if (!text) return $('#aiPaste').focus();
-      renderAiResult(T.ai.parseList(text), null);
+      const res = T.ai.parseList(text);
+      if (!res.questions.length) {
+        toast('回覆中沒有可匯入的建議問題。若 AI 拒答或要求補充，請先在原對話中確認，再貼回完整建議。');
+        return;
+      }
+      renderAiResult(res, null);
     };
   }
 
