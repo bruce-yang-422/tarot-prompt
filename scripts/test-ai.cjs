@@ -84,3 +84,16 @@ test('停用家族比對不會誤排除其他版本系列', () => {
   for (const id of ['gpt-5-nano', 'gpt-5.1', 'gpt-4o-mini', 'gpt-5.4-nano-2026-03-17']) assert.equal(ai.isDeprecatedModel(id), true);
   for (const id of ['gpt-5.4', 'gpt-5.4-mini', 'gpt-5.6-luna', 'gpt-6-luna']) assert.equal(ai.isDeprecatedModel(id), false);
 });
+
+test('貼回釐清問題不會誤當建議，也不接受混入的牌陣與題目', () => {
+  for (const reply of [
+    '```text\n釐清問題：先別鬧 😄 最近想釐清什麼事？\n```',
+    '```json\n{"followUp":"最近想釐清什麼事？","questions":[{"text":"不應顯示的泛泛問題？"}],"category":"其他","spreads":["obstacle"]}\n```',
+  ]) {
+    const res = parse(reply);
+    assert.ok(res.followUp);
+    assert.deepEqual(res.questions, []);
+    assert.deepEqual(res.spreads, []);
+    assert.equal(res.category, '');
+  }
+});

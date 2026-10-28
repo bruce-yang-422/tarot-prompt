@@ -1,7 +1,13 @@
-// AI 問題整理：使用者自備 OpenAI API key 時由瀏覽器直接呼叫；沒有 key 時產生 Prompt 讓使用者複製貼上。
+// AI 問題整理：由瀏覽器直接呼叫 OpenAI 或 Google Gemini；沒有 key 時改用複製貼上。
 (function () {
   const T = (window.Tarot = window.Tarot || {});
   const API = 'https://api.openai.com/v1';
+  const GOOGLE_API = 'https://generativelanguage.googleapis.com/v1beta';
+  const PROVIDERS = {
+    openai: { name: 'OpenAI', defaultModel: 'gpt-6-luna', keyLabel: 'OpenAI API key', placeholder: 'sk-...', pricingUrl: 'https://developers.openai.com/api/docs/pricing' },
+    google: { name: 'Google', defaultModel: 'gemini-3.5-flash-lite', keyLabel: 'Google AI Studio API key', placeholder: 'AIza...', pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing' },
+  };
+  const providerInfo = (provider) => PROVIDERS[provider] || PROVIDERS.openai;
   // 會先「思考」的模型（如 gpt-6-luna）實測約 5～10 秒，留餘裕
   const TIMEOUT_MS = 30000;
   // /models 沒有端點相容性資訊：依名稱挑出文字模型候選，不以版本、日期或 nano 排除。
@@ -10,9 +16,10 @@
   // 已公告停用／已關閉的文字模型家族，查核官方 models/all 與 deprecations（2026-10-28）。
   const DEPRECATED_MODELS = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4.1', 'gpt-4.5', 'gpt-4o', 'chatgpt-4o', 'gpt-5', 'gpt-5.1', 'gpt-5.2-chat', 'gpt-5.3-chat', 'gpt-5.4-nano', 'o1', 'o3', 'o4-mini'];
 
-  function isDeprecatedModel(id) {
-    const base = id.replace(/^ft:/, '').split(':')[0];
-    return DEPRECATED_MODELS.some((model) => base === model || base.startsWith(model + '-'));
+  function isDeprecatedModel(id, provider = 'openai') {
+    const base = id.replace(/^models\//, '').replace(/^ft:/, '').split(':')[0];
+    const models = provider === 'google' ? ['gemini-1.0', 'gemini-1.5', 'gemini-2.0', 'gemini-3.1-flash-lite', 'gemini-3-pro-preview', 'gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-2.5-computer-use-preview'] : DEPRECATED_MODELS;
+    return models.some((model) => base === model || base.startsWith(model + '-'));
   }
   // 官方 Standard 短上下文費率（USD / 百萬 tokens），查核日期 2026-10-28。
   // https://developers.openai.com/api/docs/models/{id}；停用日期見 /api/docs/deprecations。
@@ -20,13 +27,19 @@
     { id: 'gpt-6-luna', label: '極省・首選', input: 0.10, output: 0.50 },
     { id: 'gpt-5.6-luna', label: '平價・備選', input: 0.20, output: 1.20 },
   ];
+  // https://ai.google.dev/gemini-api/docs/pricing（2026-10-28），付費 Standard 費率。
+  const GOOGLE_BUDGET_MODELS = [
+    { id: 'gemini-3.5-flash-lite', label: '省錢・首選', input: 0.30, output: 2.50, freeTier: true },
+  ];
 
-  function budgetModelInfo(id) {
-    return BUDGET_MODELS.find((m) => id === m.id || (id.startsWith(m.id + '-') && /^\d{4}-\d{2}-\d{2}$/.test(id.slice(m.id.length + 1))));
+  function budgetModelInfo(id, provider = 'openai') {
+    const models = provider === 'google' ? GOOGLE_BUDGET_MODELS : BUDGET_MODELS;
+    return models.find((m) => id === m.id || (id.startsWith(m.id + '-') && /^\d{4}-\d{2}-\d{2}$/.test(id.slice(m.id.length + 1))));
   }
 
-  function budgetModels(models) {
-    return BUDGET_MODELS.map((m) => models.includes(m.id) ? m.id : models.filter((id) => budgetModelInfo(id) === m).sort().pop())
+  function budgetModels(models, provider = 'openai') {
+    const budget = provider === 'google' ? GOOGLE_BUDGET_MODELS : BUDGET_MODELS;
+    return budget.map((m) => models.includes(m.id) ? m.id : models.filter((id) => budgetModelInfo(id, provider) === m).sort().pop())
       .filter(Boolean);
   }
 
@@ -42,10 +55,45 @@
     return T.SPREADS.map((s) => `${s.id}：${s.name}（${s.description}）`).join('\n');
   }
 
+  const compact = (text) => String(text || '').replace(/[\s，。！？、：；,.!?;:'"「」『』（）()_-]/g, '').toLowerCase();
+  const PLACEHOLDER = /^(?:(?:這是|這只是|只是|我要|我想|我在)?(?:測試|测试)(?:一下|看看|功能|問題|问题|用)?|test(?:ing)?(?:question|prompt)?|問題|问题|我?不知道(?:怎麼問|要問什麼)?|隨便問問|随便问问|你好|hello|嗨|範例|示例|未填|不提供|xxx|abc)$/;
+  const playfulQuestion = (text) => {
+    if (/^(?:你|妳)(?:愛|爱|喜歡|喜欢)我(?:嗎|吗|不|嘛)?$/.test(text)) return '先別把我拉進感情牌陣 😄 你想了解的是哪段真實關係？';
+    if (/(?:啥時|啥时候|何時|何时|什麼時候|什么时候|幾歲|几岁).*(?:發財|发财|中樂透|中乐透|中彩券|中大獎|中大奖)/.test(text)) return '水晶球還沒串接銀行 😄 你現在想改善收入、存款，還是工作機會？';
+    if (/(?:滾床單|滚床单|上床|發生性關係|发生性关系|跟我睡)/.test(text) && /(?:他|她|對方|对方|同事)/.test(text)) return '塔羅不能替對方答應這件事 😄 你們目前有哪些實際互動？';
+    if (/(?:狗|貓|猫)/.test(text) && /(?:飛在天上|飞在天上|天上飛|天上飞|會飛|会飞)/.test(text)) return '先讓毛孩降落一下 😄 你指的是跳很高、夢裡的情節，還是某件真實發生的事？';
+    return '';
+  };
+
+  // 只攔截明顯測試／缺少情境的輸入，不用字數判斷，以免誤擋「失眠」「失戀」等真實困擾。
+  function clarify(form) {
+    const useful = (value) => {
+      const text = compact(value);
+      return text && !PLACEHOLDER.test(text) && !/^(?:\d+|[x哈呵]+)$/.test(text) && !playfulQuestion(text);
+    };
+    const background = String(form.background || '').split(/\r?\n/).map((line) => line.replace(/^補充[（(].*?[）)][:：]\s*/, '').replace(/^原本的描述[:：]\s*/, ''));
+    const answers = T.bgAnswersFor ? T.bgAnswersFor(form) : {};
+    const details = T.bgQuestionsFor ? T.bgQuestionsFor(form.category, form)
+      .filter((q) => q.type === 'text' && (!T.bgVisible || T.bgVisible(q, answers)))
+      .map((q) => answers[q.id]) : [];
+    if (background.concat(details).some(useful)) return null;
+    const question = compact(form.question);
+    const playful = playfulQuestion(question);
+    if (!playful && useful(form.question)) return null;
+    return {
+      followUp: playful || (question ? '先別鬧 😄 想試功能也可以，先說一件最近發生、你想釐清的事吧？' : '最近發生了什麼事，或有哪個困擾想釐清？'),
+      questions: [], category: '', timeframe: '', spreads: [],
+    };
+  }
+
   // format: 'json' 給 API 用；'list' 給使用者複製到聊天介面用
   function buildPrompt(form, format) {
     const L = [
-      '請協助我做文字整理：把下方的生活情境，改寫成 3 個以我自己為主角、可以用來自我反思的開放式問題。',
+      '請協助我整理提問。先判斷下方資料是否提供真實事件、具體困擾或明確的探索主題，資訊足夠才改寫成以我自己為主角的開放式問題。',
+      '資訊不足時，只補問一個最關鍵的問題；不要硬湊三題，也不要建議類別、時間範圍或牌陣。類別、時間範圍、性別、年齡與單純的心情選項，不等於具體情境。',
+      '只依據我提供的事實，不把「測試問題」「你好」或無意義文字當成人生困擾，不自行推論我迷惘、焦慮、需要成長或缺乏主導權。',
+      '遇到玩笑或試探，可以用一句輕鬆、不羞辱人的話接梗，再問真實情境；明顯測試可說「先別鬧 😄」。不要嘲笑認真的困擾或直接認定對方在惡搞。',
+      '「啥時會發財」改問想改善的財務目標；問他人是否願意發生親密關係，先問實際互動，不替別人判定意願；「你愛我嗎」輕鬆帶回真實關係；不合理情節先釐清是玩笑、夢境、創作或實際事件，不當成事實。',
       '這些問題之後會用在塔羅自我探索活動；本次只需改寫問題，並依主題選擇牌陣名稱，不需要抽牌、解牌、預測未來或回答問題本身。',
       '如果情境涉及健康、心理、法律或財務，請聚焦於我的感受、需求與可採取的行動，不做診斷、治療建議或專業判斷。',
       ...(form.category ? ['', `【想問的方向】${form.category}（整理出的問題請聚焦在這個方向）`] : []),
@@ -56,17 +104,17 @@
     L.push(...T.contextLines(form));
     if ((form.background || '').trim()) L.push(form.background.trim());
     L.push('', '【好問題的原則】', ...PRINCIPLES, '');
-    L.push('請提供 3 個不同角度的問題，每個附一句說明為什麼這樣問比較好。');
-    L.push(`並建議：問題類別（${T.CATEGORIES.join('／')}）、時間範圍、適合的牌陣。`);
+    L.push('資訊足夠時，提供最多 3 個有實際差異的問題，每個附一句理由；只有一兩個合適角度就少給，不要用抽象套話湊數。');
+    L.push(`只有資訊足夠時才建議：問題類別（${T.CATEGORIES.join('／')}）、時間範圍、適合的牌陣。`);
     if (format === 'json') {
       L.push('牌陣只能從以下清單選，填 id：', spreadList(), '');
-      L.push('如果我的描述太模糊、無法整理，請在 followUp 放一個釐清用的問題，questions 留空陣列。');
+      L.push('資訊不足或仍需釐清時，在 followUp 放一句輕鬆回應與一個補充問題；questions、spreads 留空陣列，category、timeframe 留空字串。followUp 與建議問題不可同時輸出。');
       L.push('只回傳 JSON，格式如下：');
       L.push('{"followUp":"","questions":[{"text":"建議問題","why":"為什麼這樣問比較好"}],"category":"類別","timeframe":"時間範圍","spreads":["牌陣 id"]}');
     } else {
       L.push('牌陣請依探索主題從以下清單選一個，不代表預測或專業評估：', spreadList(), '');
-      L.push('如果我的描述太模糊、無法整理，請先問我一個問題釐清。');
-      L.push('資訊足夠時，請把整份回答放在一個程式碼區塊（```text）裡，方便我直接複製。只輸出以下 9 行，每個標籤與內容放在同一行，不另加選擇理由或最推薦題目：');
+      L.push('資訊不足時，只輸出一行「釐清問題：輕鬆回應與一個補充問題」，不輸出其他欄位。');
+      L.push('資訊足夠時，請把整份回答放在一個程式碼區塊（```text）裡，方便我直接複製。依下方格式輸出，每個標籤與內容放在同一行，不另加選擇理由或最推薦題目；問題不足三題時省略多餘的題目與理由行：');
       L.push('1. 建議問題：……', '理由：……', '2. 建議問題：……', '理由：……', '3. 建議問題：……', '理由：……', '建議類別：……', '建議時間範圍：……', '建議牌陣：……（填清單中的完整名稱，不填 id）');
     }
     L.push('請用繁體中文回答。');
@@ -82,23 +130,29 @@
 
   const MESSAGES = {
     invalid: 'API key 無效，請到設定檢查。',
-    quota: 'OpenAI 帳戶額度不足或請求太頻繁，請稍後再試。',
-    rejected: 'OpenAI 拒絕了這次請求，可能是額度不足、請求太頻繁，或設定的模型名稱不正確。',
-    network: '連不上 OpenAI，請檢查網路連線。',
-    timeout: 'OpenAI 回應逾時，請稍後再試。',
+    quota: 'API 額度不足或請求太頻繁，請稍後再試。',
+    rejected: 'AI 服務拒絕請求，請檢查額度、API key 權限與模型設定。',
+    network: '連不上 AI 服務，請檢查網路連線。',
+    timeout: 'AI 回應逾時，請稍後再試。',
     format: 'AI 的回覆格式無法解析。',
     aborted: '已取消。',
+    blocked: 'AI 未提供內容，請調整問題後再試，或改用複製貼上。',
   };
 
   function withTimeout(signal) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort('timeout'), TIMEOUT_MS);
-    if (signal) signal.addEventListener('abort', () => ctrl.abort('user'));
-    return { signal: ctrl.signal, done: () => clearTimeout(timer), ctrl };
+    const abort = () => ctrl.abort('user');
+    if (signal) {
+      if (signal.aborted) abort();
+      else signal.addEventListener('abort', abort, { once: true });
+    }
+    return { signal: ctrl.signal, done: () => { clearTimeout(timer); if (signal) signal.removeEventListener('abort', abort); }, ctrl };
   }
 
   // GET /v1/models 的錯誤回應有 CORS 標頭，瀏覽器讀得到 401，用來判斷 key 是否有效
-  async function listModels(key) {
+  async function listModels(key, provider = 'openai') {
+    if (provider === 'google') return listGoogleModels(key);
     let res;
     try {
       res = await fetch(API + '/models', { headers: { Authorization: 'Bearer ' + key } });
@@ -112,8 +166,67 @@
     return [...new Set((data.data || []).map((m) => m.id).filter((id) => typeof id === 'string' && /^(?:ft:)?(?:gpt-\d|chatgpt-\d|o\d)/.test(id) && !NOT_CHAT.test(id) && !isDeprecatedModel(id)))].sort();
   }
 
+  async function googleRequest(path, key, body, signal) {
+    const t = withTimeout(signal);
+    try {
+      const res = await fetch(GOOGLE_API + path, {
+        method: body ? 'POST' : 'GET', signal: t.signal,
+        headers: { 'x-goog-api-key': key, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      });
+      if (res.status === 401) throw new AiError('invalid', MESSAGES.invalid);
+      if (res.status === 429) throw new AiError('quota', MESSAGES.quota);
+      if (res.status === 403) throw new AiError('rejected', 'Google 拒絕存取，請檢查 key 權限與 API 限制。');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const invalidKey = (data.error && data.error.details || []).some((d) => d.reason === 'API_KEY_INVALID');
+        throw new AiError(invalidKey ? 'invalid' : 'rejected', invalidKey ? MESSAGES.invalid : `Google 請求失敗（${res.status}），請檢查模型、key 與服務地區。`);
+      }
+      return await res.json();
+    } catch (err) {
+      if (err instanceof AiError) throw err;
+      if (t.signal.aborted) throw new AiError(t.signal.reason === 'user' ? 'aborted' : 'timeout', MESSAGES[t.signal.reason === 'user' ? 'aborted' : 'timeout']);
+      throw new AiError('network', MESSAGES.network);
+    } finally { t.done(); }
+  }
+
+  async function listGoogleModels(key) {
+    const models = [];
+    const seen = new Set();
+    let token = '';
+    do {
+      const data = await googleRequest('/models?pageSize=1000' + (token ? '&pageToken=' + encodeURIComponent(token) : ''), key);
+      for (const model of data.models || []) {
+        const id = String(model.name || '').replace(/^models\//, '');
+        if ((model.supportedGenerationMethods || []).includes('generateContent') && /^gemini-/.test(id)
+          && !/(?:^|-)(?:tts|audio|image|live|robotics|embedding)(?:-|$)/.test(id)
+          && !isDeprecatedModel(id, 'google')) models.push(id);
+      }
+      token = data.nextPageToken || '';
+      if (token && seen.has(token)) throw new AiError('format', MESSAGES.format);
+      seen.add(token);
+    } while (token);
+    return [...new Set(models)].sort();
+  }
+
+  async function googleJSON({ key, model, prompt, signal }) {
+    const id = (model || PROVIDERS.google.defaultModel).replace(/^models\//, '');
+    const data = await googleRequest('/models/' + encodeURIComponent(id) + ':generateContent', key, {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: 'application/json' },
+    }, signal);
+    const candidate = (data.candidates || [])[0];
+    if (data.promptFeedback && data.promptFeedback.blockReason || !candidate || (candidate.finishReason && candidate.finishReason !== 'STOP')) {
+      throw new AiError('blocked', MESSAGES.blocked);
+    }
+    const text = ((candidate.content && candidate.content.parts) || []).filter((p) => !p.thought && typeof p.text === 'string').map((p) => p.text).join('');
+    if (!text.trim()) throw new AiError('blocked', MESSAGES.blocked);
+    return text;
+  }
+
   // 呼叫 OpenAI，要求回傳 JSON，回傳 JSON 文字內容
-  async function chatJSON({ key, model, prompt, signal }) {
+  async function chatJSON({ key, model, prompt, signal, provider = 'openai' }) {
+    if (provider === 'google') return googleJSON({ key, model, prompt, signal });
     const t = withTimeout(signal);
     let res;
     try {
@@ -155,12 +268,17 @@
     }
   }
 
-  async function suggest({ key, model, form, signal }) {
-    return normalize(await chatJSON({ key, model, prompt: buildPrompt(form, 'json'), signal }));
+  async function suggest({ key, model, form, signal, provider = 'openai' }) {
+    if (signal && signal.aborted) throw new AiError('aborted', MESSAGES.aborted);
+    const followUp = clarify(form);
+    if (followUp) return followUp;
+    return normalize(await chatJSON({ key, model, prompt: buildPrompt(form, 'json'), signal, provider }));
   }
 
   // 依問題與已回答的背景問卷，請 AI 補問 2～3 題（選擇題或簡答），格式與背景小問卷相同
-  async function suggestQuestions({ key, model, form, signal }) {
+  async function suggestQuestions({ key, model, form, signal, provider = 'openai' }) {
+    const followUp = clarify(form);
+    if (followUp) throw new AiError('context', followUp.followUp);
     const asked = T.bgQuestionsFor(form.category, form)
       .filter((q) => !q.ai)
       .map((q) => q.label);
@@ -184,7 +302,7 @@
     ]
       .filter((l) => l !== '')
       .join('\n');
-    const obj = parseJSON(await chatJSON({ key, model, prompt, signal }));
+    const obj = parseJSON(await chatJSON({ key, model, prompt, signal, provider }));
     const list = (Array.isArray(obj.questions) ? obj.questions : [])
       .map((q, i) => {
         const type = ['single', 'multi', 'text'].includes(q.type) ? q.type : 'text';
@@ -206,6 +324,7 @@
 
   function normalize(content) {
     const obj = parseJSON(content);
+    if (typeof obj.followUp === 'string' && obj.followUp.trim()) return { followUp: obj.followUp.trim(), questions: [], category: '', timeframe: '', spreads: [] };
     return {
       followUp: typeof obj.followUp === 'string' ? obj.followUp.trim() : '',
       questions: (Array.isArray(obj.questions) ? obj.questions : [])
@@ -226,6 +345,7 @@
   // - 也接受整段貼上 JSON（例如用了 JSON 格式的 Prompt）
   const NUM = /^(?:[(（]\s*[0-9０-９一二三]\s*[)）]|[QqＱ]\s*[0-9０-９]\s*[.、．:：)）]?|[0-9０-９]\s*[.、．)）]|[一二三]\s*[、.．]|[①②③]|第\s*[0-9０-９一二三]\s*[題个個]\s*[:：、.．]?)\s*/;
   const LABEL = {
+    followUp: /^(?:釐清問題|需要補充|補充問題)\s*[:：]\s*/,
     question: /^(?:建議)?(?:的)?問題\s*[0-9０-９一二三]?\s*[:：]\s*/,
     why: /^(?:理由|原因|說明|為什麼(?:這樣問)?(?:比較好)?)\s*[:：]\s*/,
     category: /^(?:建議)?(?:的)?(?:問題)?類別\s*[:：]\s*/,
@@ -248,7 +368,7 @@
     if (json) {
       try {
         const res = normalize(json[0]);
-        if (res.questions.length) return res;
+        if (res.questions.length || res.followUp) return res;
       } catch (e) {
         // 不是合法 JSON，當成一般文字繼續解析
       }
@@ -289,7 +409,10 @@
       const numbered = body !== l || pending;
       pending = false;
       let m;
-      if ((m = body.match(LABEL.category))) {
+      if ((m = body.match(LABEL.followUp))) {
+        out.followUp = body.slice(m[0].length).trim();
+        lastQ = reasonQ = null;
+      } else if ((m = body.match(LABEL.category))) {
         const v = body.slice(m[0].length);
         out.category =
           T.CATEGORIES.find((c) => v.includes(c)) ||
@@ -324,12 +447,15 @@
     });
 
     if (!out.questions.length) loose.forEach(addQuestion);
+    if (out.followUp) return { followUp: out.followUp, questions: [], category: '', timeframe: '', spreads: [] };
     out.questions = out.questions.filter((q) => q.text).slice(0, 3);
     return out;
   }
 
   T.ai = {
     DEFAULT_MODEL: 'gpt-6-luna',
+    providerInfo,
+    clarify,
     budgetModelInfo,
     budgetModels,
     isDeprecatedModel,

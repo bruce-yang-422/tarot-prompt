@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src https://api.openai.com; object-src 'none'; base-uri 'none'; form-action 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src https://api.openai.com https://generativelanguage.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none';">
   <title>問牌 Prompt｜塔羅抽牌與 AI 解牌 Prompt 產生器</title>
   <meta name="description" content="免費線上塔羅抽牌，或輸入你手上實體牌的結果。16 種牌陣、1909 年原版偉特牌圖，自動整理成完整的解牌 Prompt，一鍵複製到 ChatGPT、Claude、Gemini 讓 AI 幫你解牌。">
   <meta name="keywords" content="塔羅牌,線上抽牌,塔羅占卜,AI 解牌,ChatGPT 塔羅,解牌 Prompt,偉特塔羅,凱爾特十字,tarot,tarot prompt">
@@ -56,7 +56,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=20261028h">
+  <link rel="stylesheet" href="css/style.css?v=20261028j">
 </head>
 <body>
   <!-- 自製 SVG 圖示：以 <svg class="icon"><use href="#i-名稱"></use></svg> 引用 -->
@@ -202,7 +202,8 @@
 
       <section class="ask-block ask-block--ai ai-tidy" id="aiTidy" aria-labelledby="aiBlockTitle">
         <h2 class="ask-block-title" id="aiBlockTitle">AI 幫我整理問題</h2>
-        <p class="muted small">會參考上面的類別、問題、你的狀況與其他補充，整理成 3 個更好的問法讓你挑選。</p>
+        <p class="muted small">參考問題與背景整理問法；資訊不足時，會先請你補充。</p>
+        <p class="muted small" id="activeAiModel" hidden></p>
         <button class="btn btn-ghost btn-block" type="button" id="openAi"><svg class="icon" aria-hidden="true"><use href="#i-sparkle"></use></svg>AI 幫我整理問題</button>
       </section>
 
@@ -286,36 +287,51 @@
   </dialog>
 
   <!-- 設定 -->
-  <dialog id="settingsDialog" class="dialog">
-    <form method="dialog" class="dialog-body" id="settingsForm" autocomplete="off">
-      <h2>設定</h2>
-      <h3>AI 問題整理</h3>
-      <p class="muted small">填入 key 即可一鍵整理問題；不填也能複製 Prompt 使用。</p>
-      <p class="muted small">API 費用另計，不包含在 ChatGPT 訂閱內。</p>
-      <label class="field-label" for="sKey">OpenAI API key</label>
-      <div class="key-field">
-        <input id="sKey" class="input" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
-        <button class="key-toggle" type="button" id="toggleKey" aria-pressed="false" aria-label="顯示 API key" title="顯示 API key"><svg class="icon" aria-hidden="true"><use href="#i-eye"></use></svg></button>
+  <dialog id="settingsDialog" class="dialog" aria-labelledby="settingsTitle">
+    <form method="dialog" class="dialog-body settings-form" id="settingsForm" autocomplete="off">
+      <h2 id="settingsTitle">AI 設定</h2>
+      <p class="muted small settings-intro">填入 key 即可一鍵整理問題；不填也能複製 Prompt 使用。</p>
+      <div class="settings-section">
+        <label class="field-label" for="sModel">使用模型</label>
+        <select id="sModel" class="input" name="tarot-model-choice" aria-describedby="modelHint modelListStatus"></select>
+        <p class="muted small" id="modelListStatus" aria-live="polite"></p>
+        <div id="customModelField" hidden>
+          <label class="field-label" for="sModelCustom" id="customModelLabel">自訂模型 ID</label>
+          <input id="sModelCustom" class="input" type="text" name="tarot-model-id" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="輸入完整模型 ID">
+        </div>
+        <p class="muted small" id="modelHint" aria-live="polite"></p>
+        <p class="muted small" id="modelPricing" hidden>Standard・US$／百萬 tokens・<a id="pricingLink" href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener noreferrer">官方價格</a>（2026-10-28）</p>
       </div>
-      <fieldset class="radio-row">
-        <legend class="field-label">保存方式</legend>
-        <label><input type="radio" name="keyRemember" value="session" checked> 本次使用（關閉分頁清除）</label>
-        <label><input type="radio" name="keyRemember" value="local"> 記住此裝置</label>
-      </fieldset>
-      <p class="muted small">Key 僅存於此瀏覽器，請自行備份；清除資料或換裝置後需重新填入。公用電腦請選「本次使用」。</p>
-      <label class="field-label" for="sModel">模型</label>
-      <select id="sModel" class="input" name="tarot-model-choice" aria-describedby="modelHint"></select>
-      <label class="check small"><input id="showAllModels" type="checkbox">顯示其他模型</label>
-      <div id="customModelField" hidden>
-        <label class="field-label" for="sModelCustom">自訂模型 ID</label>
-        <input id="sModelCustom" class="input" type="text" name="tarot-model-id" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="輸入完整模型 ID">
+      <div class="settings-section">
+        <h3 class="key-list-title">管理 API keys</h3>
+        <div id="apiKeyList" class="api-key-list" aria-label="各供應商 API key"></div>
+        <p class="muted small">新增／編輯後按「儲存」套用；刪除立即生效。</p>
+        <div id="keyEditor" class="key-editor" hidden>
+        <input id="sProvider" type="hidden" name="tarot-api-provider" value="openai">
+        <p class="muted small" id="providerHint">API 費用另計，不包含在 ChatGPT 訂閱內。</p>
+        <label class="field-label" for="sKey" id="keyLabel">OpenAI API key</label>
+        <div class="key-field">
+          <input id="sKey" class="input" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
+          <button class="key-toggle" type="button" id="toggleKey" aria-pressed="false" aria-label="顯示 API key" title="顯示 API key"><svg class="icon" aria-hidden="true"><use href="#i-eye"></use></svg></button>
+        </div>
+        <fieldset class="radio-row settings-remember">
+          <legend class="field-label">保存方式</legend>
+          <label><input type="radio" name="keyRemember" value="session" checked> 本次使用（關閉分頁清除）</label>
+          <label><input type="radio" name="keyRemember" value="local"> 記住此裝置</label>
+        </fieldset>
+        <div class="key-editor-end">
+          <p class="muted small">公用電腦請選「本次使用」。</p>
+          <button class="btn btn-ghost btn-small" type="button" id="closeKeyEditor">收合</button>
+        </div>
+        </div>
+        <aside class="key-backup-note" role="note" aria-label="API key 備份提醒">
+          <svg class="icon" aria-hidden="true"><use href="#i-bulb"></use></svg>
+          <div><strong>請自行備份 API key</strong><p>Key 僅存於此瀏覽器；清除資料或換裝置後需重新填入。</p></div>
+        </aside>
       </div>
-      <p class="muted small" id="modelHint" aria-live="polite"></p>
-      <p class="muted small">Standard・US$／百萬 tokens・<a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener noreferrer">官方價格</a>（2026-10-28）</p>
       <p class="status-line" id="keyStatus" aria-live="polite"></p>
       <div class="dialog-actions">
-        <button class="btn btn-ghost" type="button" id="testKey">測試連線</button>
-        <button class="btn btn-ghost btn-danger" type="button" id="deleteKey">刪除 key</button>
+        <button class="btn btn-ghost" type="button" id="testKey">更新模型</button>
         <button class="btn btn-primary" type="button" id="saveSettings">儲存</button>
       </div>
       <button class="dialog-close" value="cancel" aria-label="關閉"><svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
@@ -356,9 +372,10 @@
   <script src="js/spreads.js?v=20261027b"></script>
   <script src="js/background.js?v=20261027b"></script>
   <script src="js/prompt.js?v=20261027b"></script>
-  <script src="js/storage.js?v=20261027b"></script>
-  <script src="js/ai.js?v=20261028c"></script>
-  <script src="js/app.js?v=20261028d"></script>
+  <script src="js/storage.js?v=20261028a"></script>
+  <script src="js/ai.js?v=20261028f"></script>
+  <script src="js/settings.js?v=20261028b"></script>
+  <script src="js/app.js?v=20261028g"></script>
   <script src="js/install.js?v=20261027c"></script>
 </body>
 </html>

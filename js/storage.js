@@ -50,7 +50,8 @@
     delete memory[key];
   }
 
-  const DEFAULT_SETTINGS = { tone: 'gentle', length: 'standard', uprightOnly: false, ai: { model: '' } };
+  const DEFAULT_SETTINGS = { tone: 'gentle', length: 'standard', uprightOnly: false, ai: { provider: 'openai', model: '', googleModel: '' } };
+  const keyName = (provider) => provider === 'google' ? 'apiKey.google' : 'apiKey';
 
   T.store = {
     available: localOk,
@@ -92,20 +93,20 @@
     },
 
     // API key 不寫進紀錄或草稿；「只用這一次」存在 sessionStorage，關閉分頁就清除
-    getKey() {
-      return read('apiKey', '', session, sessionOk) || read('apiKey', '');
+    getKey(provider = 'openai') {
+      return read(keyName(provider), '', session, sessionOk) || read(keyName(provider), '');
     },
-    keyRemembered() {
-      return !!read('apiKey', '');
+    keyRemembered(provider = 'openai') {
+      return !!read(keyName(provider), '');
     },
-    setKey(key, remember) {
-      this.clearKey();
-      if (remember) write('apiKey', key);
-      else write('apiKey', key, session, sessionOk);
+    setKey(key, remember, provider = 'openai') {
+      this.clearKey(provider);
+      if (remember) write(keyName(provider), key);
+      else write(keyName(provider), key, session, sessionOk);
     },
-    clearKey() {
-      remove('apiKey');
-      remove('apiKey', session, sessionOk);
+    clearKey(provider = 'openai') {
+      remove(keyName(provider));
+      remove(keyName(provider), session, sessionOk);
     },
   };
 })();

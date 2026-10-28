@@ -39,7 +39,7 @@ The app does not interpret the cards itself. It collects everything an LLM needs
 - **History** stored locally in the browser
 - **Optional AI assist**
   - Without an API key: copy a "refine my question" prompt to any chatbot and paste the answer back
-  - With your own OpenAI API key: refine the question and generate follow-up background questions directly (default model `gpt-6-luna`)
+  - With your own OpenAI or Google AI Studio API key: refine questions and generate follow-up background questions (defaults: `gpt-6-luna` and `gemini-3.5-flash-lite` respectively)
 - **PWA**: installable to the home screen; the first visit downloads the whole site in the background (about 16 MB including all 78 card images), after which it works fully offline
 - **SEO**: Open Graph / Twitter card previews, JSON-LD structured data, `sitemap.xml`, `robots.txt`
 - **Accessibility**: keyboard navigation, `aria-live` announcements, respects `prefers-reduced-motion`
@@ -72,17 +72,19 @@ python -m http.server 8000
 
 ## Configuration
 
-The OpenAI integration is optional and configured per user in the browser:
+The API integration is optional and configured per user in the browser:
 
 1. Open **設定 (Settings)** in the top bar
-2. Paste an OpenAI API key and choose whether to remember it on this device or for this session only
-3. Click **測試連線 (Test connection)** to list the chat models available to your account
+2. Under **管理 API keys (Manage API keys)**, add or edit each provider's key and storage preference; each row also has a separate delete action
+3. **使用模型 (Model)** combines text models returned for every configured provider, labels each provider, and highlights budget choices; **更新模型 (Refresh models)** reloads the lists
+4. Select a model and save to apply added or edited keys. Deleting a key takes effect immediately. The model determines which provider is called; editing a key does not change the active provider
 
 Notes:
 
 - A ChatGPT Plus subscription does not include API access; API keys are created and billed separately at [platform.openai.com](https://platform.openai.com).
-- The key never leaves the browser except in requests sent directly to `api.openai.com`.
-- Clearing browser data removes the stored key. OpenAI only shows a key once, so keep your own backup in a password manager.
+- Get a Google key from [Google AI Studio](https://aistudio.google.com/apikey); quota and billing depend on your Google account.
+- Keys are sent only to the selected provider at `api.openai.com` or `generativelanguage.googleapis.com`, never through a site backend.
+- Clearing browser data removes stored keys; keep your own backup. Google free and paid tiers have different data-use terms; see [Google pricing and data use](https://ai.google.dev/gemini-api/docs/pricing).
 
 ## Deployment
 
@@ -111,7 +113,8 @@ The site is static, so any static host works. For GitHub Pages:
 │   ├── background.js     # Background questionnaire definitions
 │   ├── prompt.js         # Card statistics, question hints, prompt builder
 │   ├── storage.js        # History, drafts, settings and API key storage
-│   ├── ai.js             # OpenAI calls: refine question, follow-up questions
+│   ├── ai.js             # OpenAI / Google: refine question, follow-up questions
+│   ├── settings.js       # API key management and combined model selector
 │   └── app.js            # Routing, views and interactions
 ├── images/rws-1909/      # 78 card images + manifest.json (source and license)
 ├── favicon.ico           # Browser tab icon

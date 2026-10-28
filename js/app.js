@@ -457,7 +457,7 @@
       })
       .join('');
     const hasExtra = S.form.bgExtra && S.form.bgExtra.category === cat;
-    const aiRow = T.store.getKey()
+    const aiRow = T.store.getKey(activeProvider())
       ? `<div class="quiz-ai"><button type="button" class="btn btn-ghost btn-small" id="aiQuiz">${icon('sparkle')}${hasExtra ? '換一組 AI 追加問題' : 'AI 依你的問題追加幾題'}</button>` +
         '<span class="muted small">依你的問題和上面的回答，補問 2～3 題</span></div>'
       : '';
@@ -522,7 +522,8 @@
     btn.disabled = true;
     btn.innerHTML = icon('sparkle') + 'AI 思考中…';
     try {
-      const questions = await T.ai.suggestQuestions({ key: T.store.getKey(), model: settings.ai.model, form: S.form });
+      const provider = activeProvider();
+      const questions = await T.ai.suggestQuestions({ key: T.store.getKey(provider), model: savedAiModel(provider), provider, form: S.form });
       // 換一組時清掉舊的 AI 題目答案
       const cat = S.form.category;
       const kept = Object.fromEntries(Object.entries(T.bgAnswersFor(S.form)).filter(([k]) => !k.startsWith('ai')));
@@ -1348,145 +1349,13 @@
 
   // ---------- 設定 ----------
 
-  const settingsDlg = $('#settingsDialog');
-  const CUSTOM_MODEL = '__custom__';
-  let availableModels = [];
+  function activeProvider() { return settings.ai.provider === 'google' ? 'google' : 'openai'; }
+  function savedAiModel(provider) { return provider === 'google' ? settings.ai.googleModel : settings.ai.model; }
 
-  function selectedModel() {
-    return $('#sModel').value === CUSTOM_MODEL ? $('#sModelCustom').value.trim() : $('#sModel').value;
-  }
-
-  function updateModelHint() {
-    const model = T.ai.budgetModelInfo(selectedModel());
-    $('#modelHint').textContent = model
-      ? `輸入 $${model.input.toFixed(2)}／輸出 $${model.output.toFixed(2)}`
-      : T.ai.isDeprecatedModel(selectedModel()) ? '已公告停用，請換模型。' : '請確認此模型的價格與支援功能。';
-  }
-
-  function renderModelChoices(current) {
-    const selected = current && !T.ai.isDeprecatedModel(current) ? current : T.ai.DEFAULT_MODEL;
-    const candidates = $('#showAllModels').checked ? availableModels : T.ai.budgetModels(availableModels);
-    const models = [...new Set([T.ai.DEFAULT_MODEL, ...candidates, selected])];
-    $('#sModel').replaceChildren(
-      ...models.map((id) => {
-        const info = T.ai.budgetModelInfo(id);
-        return new Option(`${id}${info ? `（${info.label}）` : id === selected ? '（目前設定）' : ''}`, id);
-      }),
-      new Option('自訂模型…', CUSTOM_MODEL)
-    );
-    $('#sModel').value = selected;
-    $('#customModelField').hidden = true;
-    $('#sModelCustom').value = '';
-    updateModelHint();
-  }
-
-  $('#showAllModels').addEventListener('change', () => renderModelChoices(selectedModel()));
-  $('#sModelCustom').addEventListener('input', updateModelHint);
-
-  $('#sModel').addEventListener('change', () => {
-    const custom = $('#sModel').value === CUSTOM_MODEL;
-    $('#customModelField').hidden = !custom;
-    if (custom) $('#sModelCustom').focus();
-    updateModelHint();
-  });
-
-  $('#sKey').addEventListener('input', () => {
-    availableModels = [];
-    renderModelChoices(selectedModel());
-    $('#keyStatus').textContent = 'Key 已變更，請測試連線。';
-  });
-
-  function keyStatusText() {
-    if (!T.store.getKey()) return '尚未設定 key。';
-    return T.store.keyRemembered() ? 'Key 已設定・記住此裝置' : 'Key 已設定・本次使用';
-  }
-
-  $('#openSettings').addEventListener('click', () => {
-    const key = T.store.getKey();
-    $('#sKey').value = key;
-    $('#sKey').type = 'password';
-    setKeyVisible(false);
-    $(`input[name="keyRemember"][value="${T.store.keyRemembered() ? 'local' : 'session'}"]`).checked = true;
-    $('#showAllModels').checked = false;
-    renderModelChoices(settings.ai.model || T.ai.DEFAULT_MODEL);
-    $('#keyStatus').textContent = keyStatusText();
-    if (T.ai.isDeprecatedModel(settings.ai.model || '')) $('#keyStatus').textContent += ' 原模型已公告停用，請確認新模型並儲存。';
-    settingsDlg.showModal();
-  });
-
-  // 在輸入框按 Enter 會送出表單並關閉對話框，改成執行「儲存」
-  $('#settingsForm').addEventListener('submit', (e) => {
-    if (e.submitter && e.submitter.classList.contains('dialog-close')) return;
-    e.preventDefault();
-    $('#saveSettings').click();
-  });
-
-  // 輸入框右側的眼睛圖示：切換顯示或隱藏 API key
-  function setKeyVisible(visible) {
-    const btn = $('#toggleKey');
-    const label = visible ? '隱藏 API key' : '顯示 API key';
-    $('#sKey').type = visible ? 'text' : 'password';
-    btn.innerHTML = icon(visible ? 'eye-off' : 'eye');
-    btn.setAttribute('aria-pressed', String(visible));
-    btn.setAttribute('aria-label', label);
-    btn.title = label;
-  }
-
-  $('#toggleKey').addEventListener('click', () => setKeyVisible($('#sKey').type === 'password'));
-
-  $('#testKey').addEventListener('click', async () => {
-    const key = $('#sKey').value.trim();
-    const status = $('#keyStatus');
-    if (!key) {
-      status.textContent = '請先輸入 API key。';
-      return;
-    }
-    status.textContent = '測試中…';
-    $('#testKey').disabled = true;
-    try {
-      const models = await T.ai.listModels(key);
-      if ($('#sKey').value.trim() !== key) return;
-      availableModels = models;
-      renderModelChoices(selectedModel());
-      const budgetCount = T.ai.budgetModels(models).length;
-      status.textContent = models.length
-        ? budgetCount ? `✓ 已連線・${budgetCount} 個省錢選項` : '✓ 已連線・請選其他模型或自訂'
-        : '✓ 已連線・未找到模型，請自訂';
-    } catch (err) {
-      if ($('#sKey').value.trim() === key) status.textContent = '✕ ' + err.message;
-    } finally {
-      $('#testKey').disabled = false;
-    }
-  });
-
-  $('#deleteKey').addEventListener('click', () => {
-    T.store.clearKey();
-    $('#sKey').value = '';
-    availableModels = [];
-    renderModelChoices(selectedModel());
-    $('#keyStatus').textContent = '已刪除 API key。';
-  });
-
-  $('#saveSettings').addEventListener('click', () => {
-    const model = selectedModel();
-    if (!model) {
-      $('#keyStatus').textContent = '請輸入自訂模型的完整名稱。';
-      $('#sModelCustom').focus();
-      return;
-    }
-    if (T.ai.isDeprecatedModel(model)) {
-      $('#keyStatus').textContent = '此模型已公告停用，請改選推薦模型。';
-      return;
-    }
-    const key = $('#sKey').value.trim();
-    if (key) T.store.setKey(key, $('input[name="keyRemember"]:checked').value === 'local');
-    else T.store.clearKey();
-    settings.ai = { model: model === T.ai.DEFAULT_MODEL ? '' : model };
-    T.store.saveSettings({ ai: settings.ai });
-    settingsDlg.close();
+  T.setupAiSettings({ settings, icon, onSaved: () => {
     if (!view('ask').hidden) renderQuiz();
     toast('設定已儲存');
-  });
+  } });
 
   // ---------- AI 問題整理 ----------
 
@@ -1494,14 +1363,11 @@
   let aiCtrl = null;
 
   $('#openAi').addEventListener('click', () => {
-    if (!S.form.question.trim() && !S.form.background.trim()) {
-      toast('先在問題框隨意寫下你的狀況，再請 AI 幫忙整理');
-      $('#fQuestion').focus();
-      return;
-    }
     aiDlg.showModal();
-    const key = T.store.getKey();
-    if (key) runAiApi(key);
+    const key = T.store.getKey(activeProvider());
+    const followUp = T.ai.clarify(S.form);
+    if (followUp) renderAiResult(followUp, key);
+    else if (key) runAiApi(key);
     else renderAiManual();
   });
 
@@ -1521,7 +1387,8 @@
     const ctrl = aiCtrl;
     $('#aiCancel').onclick = () => ctrl.abort();
     try {
-      const res = await T.ai.suggest({ key, model: settings.ai.model, form: S.form, signal: ctrl.signal });
+      const provider = activeProvider();
+      const res = await T.ai.suggest({ key, model: savedAiModel(provider), provider, form: S.form, signal: ctrl.signal });
       if (ctrl !== aiCtrl) return;
       renderAiResult(res, key);
     } catch (err) {
@@ -1541,9 +1408,9 @@
   function renderAiResult(res, key) {
     const body = $('#aiBody');
     if (!res.questions.length) {
-      if (res.followUp && key) {
+      if (res.followUp) {
         body.innerHTML = `
-          <p>AI 想先問你一個問題：</p>
+          <p>先補充一點背景：</p>
           <p class="followup">${esc(res.followUp)}</p>
           <label class="field-label" for="aiFollow">你的回答</label>
           <textarea id="aiFollow" class="input" rows="3"></textarea>
@@ -1554,7 +1421,10 @@
           S.form.background = (S.form.background ? S.form.background + '\n' : '') + `補充（${res.followUp}）：${answer}`;
           saveDraft();
           syncAskInputs();
-          runAiApi(key);
+          const followUp = T.ai.clarify(S.form);
+          if (followUp) renderAiResult(followUp, key);
+          else if (key) runAiApi(key);
+          else renderAiManual();
         };
         return;
       }
@@ -1618,7 +1488,7 @@
       <label class="field-label" for="aiPaste">AI 的回覆</label>
       <textarea id="aiPaste" class="input" rows="6" placeholder="把 AI 的回覆貼在這裡"></textarea>
       <button type="button" class="btn btn-ghost btn-block" id="aiParse">整理成建議</button>
-      <p class="muted small">有 OpenAI API key？到「⚙ 設定」填入，下次按一下就能直接整理。</p>`;
+      <p class="muted small">有 OpenAI 或 Google AI Studio 的 key？到「⚙ 設定」填入即可一鍵整理。</p>`;
     $('#aiCopy').onclick = async () => {
       const ok = await copyText(T.ai.buildPrompt(S.form, 'list'));
       toast(ok ? '已複製，貼到 AI 的對話框吧' : '複製失敗，請再試一次');
@@ -1627,7 +1497,7 @@
       const text = $('#aiPaste').value.trim();
       if (!text) return $('#aiPaste').focus();
       const res = T.ai.parseList(text);
-      if (!res.questions.length) {
+      if (!res.questions.length && !res.followUp) {
         toast('回覆中沒有可匯入的建議問題。若 AI 拒答或要求補充，請先在原對話中確認，再貼回完整建議。');
         return;
       }
@@ -1658,7 +1528,7 @@
     privacy: {
       title: '隱私說明',
       message:
-        '<p>你的問題與占卜紀錄只存在你自己的瀏覽器。本網站沒有伺服器，不會收集任何資料。</p><p>使用「AI 問題整理」並填入自己的 API key 時，你的問題會從瀏覽器直接送到 OpenAI，適用 OpenAI 的隱私政策。複製 Prompt 貼到 AI 服務後，也適用該服務的隱私政策。</p>',
+        '<p>你的問題與占卜紀錄只存在你自己的瀏覽器。本網站沒有伺服器，不會收集任何資料。</p><p>使用 API 整理時，問題會直接送到你選擇的 OpenAI 或 Google，適用該服務的資料使用政策；Google 免費與付費額度的資料使用方式可能不同。複製 Prompt 貼到 AI 服務後，也適用該服務的隱私政策。</p>',
     },
   };
 

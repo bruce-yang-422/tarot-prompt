@@ -2,7 +2,7 @@
 // - 網站本身（HTML、CSS、JS、圖示）安裝時先快取，之後一律「先連網、失敗才用快取」，確保拿到最新版
 // - 78 張牌圖（約 15MB，整個網站約 16MB）安裝時一起下載，之後「先用快取」，離線也能看到每一張牌
 //   圖檔清單讀自 images/rws-1909/manifest.json；個別圖檔下載失敗不影響安裝，之後看到時會再補存
-const SHELL_CACHE = 'wenpai-shell-v7';
+const SHELL_CACHE = 'wenpai-shell-v9';
 const IMAGE_CACHE = 'wenpai-images-v1';
 
 const SHELL_FILES = [
@@ -15,6 +15,7 @@ const SHELL_FILES = [
   'js/prompt.js',
   'js/storage.js',
   'js/ai.js',
+  'js/settings.js',
   'js/app.js',
   'js/install.js',
   'manifest.webmanifest',
@@ -65,7 +66,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
-  // 只處理同網域的 GET；呼叫 OpenAI 等外部請求不經過快取
+  // 只處理同網域的 GET；OpenAI、Google 等外部 API 請求不經過快取
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
 
   if (url.pathname.includes('/images/rws-1909/')) {

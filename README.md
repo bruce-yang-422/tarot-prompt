@@ -39,7 +39,7 @@
 - **占卜紀錄**存在瀏覽器
 - **選用的 AI 輔助**
   - 沒有 API key：複製「整理問題 Prompt」到任何 AI，再把回覆貼回來
-  - 有自己的 OpenAI API key：直接整理問題、追加背景問題（預設模型 `gpt-6-luna`）
+  - 有自己的 OpenAI 或 Google AI Studio API key：直接整理問題、追加背景問題（預設模型分別為 `gpt-6-luna`、`gemini-3.5-flash-lite`）
 - **PWA**：可「加到主畫面」當成 App 使用；第一次開啟時會在背景下載整個網站（約 16MB，含 78 張牌圖），之後完全離線也能使用
 - **SEO**：Open Graph／Twitter 分享預覽、JSON-LD 結構化資料、`sitemap.xml`、`robots.txt`
 - **無障礙**：可用鍵盤操作、`aria-live` 通知、遵循「減少動態效果」設定
@@ -72,17 +72,19 @@ python -m http.server 8000
 
 ## 設定
 
-OpenAI 串接是選用功能，每位使用者在自己的瀏覽器設定：
+API 串接是選用功能，每位使用者在自己的瀏覽器設定：
 
 1. 點頂端列的「設定」
-2. 貼上 OpenAI API key，選擇「記住在這台裝置」或「只用這一次」
-3. 按「測試連線」，會列出帳戶可用的對話模型
+2. 在「管理 API keys」點各家的「新增 key」或「編輯」，填入 key 並選擇保存方式；每列也可單獨刪除
+3. 上方「使用模型」會合併列出已填 key 的供應商回傳的文字模型，標示供應商與省錢選項；可按「更新模型」重新載入
+4. 選擇要使用的模型並「儲存」，套用新增／編輯的 key。刪除 key 立即生效；實際呼叫由模型選擇決定，編輯 key 不會切換使用中的服務
 
 注意：
 
 - ChatGPT Plus 訂閱不包含 API；API key 要另外到 [platform.openai.com](https://platform.openai.com) 申請並計費。
-- key 只會用在瀏覽器直接送往 `api.openai.com` 的請求。
-- 清除瀏覽資料會一併刪除記住的 key。OpenAI 的 key 只會顯示一次，請自行備份在密碼管理工具。
+- Google 的 key 可從 [Google AI Studio](https://aistudio.google.com/apikey) 取得；額度、計費與資料使用依 Google 帳戶方案為準。
+- key 只會送往所選服務的 `api.openai.com` 或 `generativelanguage.googleapis.com`，不經過本站伺服器。
+- 清除瀏覽資料會刪除記住的 key，請自行備份。Google 免費與付費額度的資料使用政策不同，詳見[官方價格與資料使用說明](https://ai.google.dev/gemini-api/docs/pricing)。
 
 ## 部署
 
@@ -111,7 +113,8 @@ OpenAI 串接是選用功能，每位使用者在自己的瀏覽器設定：
 │   ├── background.js     # 背景小問卷題目
 │   ├── prompt.js         # 牌面統計、問題提示、Prompt 產生
 │   ├── storage.js        # 紀錄、草稿、設定、API key 的儲存
-│   ├── ai.js             # 呼叫 OpenAI：整理問題、追加背景問題
+│   ├── ai.js             # 呼叫 OpenAI／Google：整理問題、追加背景問題
+│   ├── settings.js       # API key 管理、混合供應商模型清單
 │   └── app.js            # 路由、畫面與互動
 ├── images/rws-1909/      # 78 張牌圖與 manifest.json（來源與授權）
 ├── favicon.ico           # 瀏覽器分頁圖示
