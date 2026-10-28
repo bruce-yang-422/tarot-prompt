@@ -4,8 +4,31 @@
   const API = 'https://api.openai.com/v1';
   // 會先「思考」的模型（如 gpt-6-luna）實測約 5～10 秒，留餘裕
   const TIMEOUT_MS = 30000;
-  // 帳戶模型清單裡混有已停用的舊模型與非對話用途的模型，「測試連線」時不列出
-  const NOT_CHAT = /codex|pro|search|tts|transcribe|audio|realtime|image|instruct|16k|vision|preview|chat-latest|\d{4}-\d{2}-\d{2}|^gpt-3\.5|^gpt-4(-|$)|^gpt-4\.1-nano/;
+  // /models 沒有端點相容性資訊：依名稱挑出文字模型候選，不以版本、日期或 nano 排除。
+  // 排除明確的專用模型；清單成功不代表已測試 Chat Completions 與 JSON mode。
+  const NOT_CHAT = /(?:^|-)(?:codex|pro|search|tts|transcribe|audio|realtime|image|instruct|embedding|moderation|deep-research)(?:-|$)/;
+  // 已公告停用／已關閉的文字模型家族，查核官方 models/all 與 deprecations（2026-10-28）。
+  const DEPRECATED_MODELS = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4.1', 'gpt-4.5', 'gpt-4o', 'chatgpt-4o', 'gpt-5', 'gpt-5.1', 'gpt-5.2-chat', 'gpt-5.3-chat', 'gpt-5.4-nano', 'o1', 'o3', 'o4-mini'];
+
+  function isDeprecatedModel(id) {
+    const base = id.replace(/^ft:/, '').split(':')[0];
+    return DEPRECATED_MODELS.some((model) => base === model || base.startsWith(model + '-'));
+  }
+  // 官方 Standard 短上下文費率（USD / 百萬 tokens），查核日期 2026-10-28。
+  // https://developers.openai.com/api/docs/models/{id}；停用日期見 /api/docs/deprecations。
+  const BUDGET_MODELS = [
+    { id: 'gpt-6-luna', label: '極省・首選', input: 0.10, output: 0.50 },
+    { id: 'gpt-5.6-luna', label: '平價・備選', input: 0.20, output: 1.20 },
+  ];
+
+  function budgetModelInfo(id) {
+    return BUDGET_MODELS.find((m) => id === m.id || (id.startsWith(m.id + '-') && /^\d{4}-\d{2}-\d{2}$/.test(id.slice(m.id.length + 1))));
+  }
+
+  function budgetModels(models) {
+    return BUDGET_MODELS.map((m) => models.includes(m.id) ? m.id : models.filter((id) => budgetModelInfo(id) === m).sort().pop())
+      .filter(Boolean);
+  }
 
   const PRINCIPLES = [
     '1. 以我自己為主角，不替別人問',
@@ -86,7 +109,7 @@
     if (res.status === 429) throw new AiError('quota', MESSAGES.quota);
     if (!res.ok) throw new AiError('network', `OpenAI 回應錯誤（${res.status}）。`);
     const data = await res.json();
-    return (data.data || []).map((m) => m.id).filter((id) => /^gpt-\d/.test(id) && !NOT_CHAT.test(id)).sort();
+    return [...new Set((data.data || []).map((m) => m.id).filter((id) => typeof id === 'string' && /^(?:ft:)?(?:gpt-\d|chatgpt-\d|o\d)/.test(id) && !NOT_CHAT.test(id) && !isDeprecatedModel(id)))].sort();
   }
 
   // 呼叫 OpenAI，要求回傳 JSON，回傳 JSON 文字內容
@@ -307,6 +330,9 @@
 
   T.ai = {
     DEFAULT_MODEL: 'gpt-6-luna',
+    budgetModelInfo,
+    budgetModels,
+    isDeprecatedModel,
     MESSAGES,
     buildPrompt,
     listModels,

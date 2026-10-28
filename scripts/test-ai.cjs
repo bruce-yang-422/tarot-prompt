@@ -53,3 +53,34 @@ test('保留行內理由、獨立編號、無編號標籤與 JSON 格式的相�
 test('拒答不會被誤認成建議問題', () => {
   assert.deepEqual(parse('我是一个语言模型，这超出了我的设计用途。').questions, []);
 });
+
+test('模型候選保留未停用的日期版本，排除專用與已公告停用的模型', async () => {
+  const expected = ['gpt-6-luna', 'gpt-6.1-sol', 'gpt-6-luna-2026-10-01', 'gpt-5.6-luna', 'gpt-5.4-mini', 'ft:gpt-5.4-mini:example:custom:123'];
+  const excluded = ['gpt-image-1', 'gpt-4o-audio-preview', 'gpt-realtime', 'gpt-5-pro', 'gpt-5-codex', 'o3-deep-research', 'text-embedding-3-small', 'whisper-1', 'gpt-5-nano', 'gpt-5-nano-2025-08-07', 'gpt-4.1-nano', 'o3', 'o4-mini', 'ft:gpt-4.1:example:custom:123', 'gpt-5.4-nano', 'gpt-5.2-chat-latest'];
+  const ctx = vm.createContext({ window: {}, fetch: async () => ({
+    ok: true, status: 200,
+    json: async () => ({ data: [...expected, ...excluded, expected[0], null].map((id) => ({ id })) }),
+  }) });
+  vm.runInContext(readFileSync(path.join(__dirname, '..', 'js', 'ai.js'), 'utf8'), ctx);
+  assert.deepEqual(Array.from(await ctx.window.Tarot.ai.listModels('test-placeholder')), expected.sort());
+});
+
+test('模型清單拒絕無效 key，不顯示成連線成功', async () => {
+  const ctx = vm.createContext({ window: {}, fetch: async () => ({ ok: false, status: 401 }) });
+  vm.runInContext(readFileSync(path.join(__dirname, '..', 'js', 'ai.js'), 'utf8'), ctx);
+  await assert.rejects(ctx.window.Tarot.ai.listModels('test-placeholder'), { code: 'invalid' });
+});
+
+test('省錢清單只挑現行 Luna，優先選別名並合併日期版本', () => {
+  const ai = context.window.Tarot.ai;
+  assert.deepEqual(Array.from(ai.budgetModels(['gpt-5-nano', 'gpt-6-luna-2026-10-01', 'gpt-6-luna', 'gpt-5.6-luna', 'gpt-6.1-sol'])), ['gpt-6-luna', 'gpt-5.6-luna']);
+  assert.deepEqual(Array.from(ai.budgetModels(['gpt-6-luna-2026-10-01', 'gpt-6-luna-2026-09-01'])), ['gpt-6-luna-2026-10-01']);
+  assert.equal(ai.budgetModelInfo('gpt-5-nano'), undefined);
+  assert.equal(ai.budgetModelInfo('gpt-6-luna-pro'), undefined);
+});
+
+test('停用家族比對不會誤排除其他版本系列', () => {
+  const ai = context.window.Tarot.ai;
+  for (const id of ['gpt-5-nano', 'gpt-5.1', 'gpt-4o-mini', 'gpt-5.4-nano-2026-03-17']) assert.equal(ai.isDeprecatedModel(id), true);
+  for (const id of ['gpt-5.4', 'gpt-5.4-mini', 'gpt-5.6-luna', 'gpt-6-luna']) assert.equal(ai.isDeprecatedModel(id), false);
+});

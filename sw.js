@@ -2,7 +2,7 @@
 // - 網站本身（HTML、CSS、JS、圖示）安裝時先快取，之後一律「先連網、失敗才用快取」，確保拿到最新版
 // - 78 張牌圖（約 15MB，整個網站約 16MB）安裝時一起下載，之後「先用快取」，離線也能看到每一張牌
 //   圖檔清單讀自 images/rws-1909/manifest.json；個別圖檔下載失敗不影響安裝，之後看到時會再補存
-const SHELL_CACHE = 'wenpai-shell-v6';
+const SHELL_CACHE = 'wenpai-shell-v7';
 const IMAGE_CACHE = 'wenpai-images-v1';
 
 const SHELL_FILES = [
@@ -21,6 +21,8 @@ const SHELL_FILES = [
   'favicon.ico',
   'icons/logo-128.png',
   'icons/logo-256.png',
+  'icons/tarot-cards-star-moon.png',
+  'icons/hand-holding-tarot-card.png',
   'icons/icon-192.png',
   'icons/favicon-32.png',
 ];

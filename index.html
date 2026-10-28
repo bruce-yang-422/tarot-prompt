@@ -56,7 +56,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=20261028b">
+  <link rel="stylesheet" href="css/style.css?v=20261028h">
 </head>
 <body>
   <!-- 自製 SVG 圖示：以 <svg class="icon"><use href="#i-名稱"></use></svg> 引用 -->
@@ -104,12 +104,12 @@
       </div>
       <div class="mode-cards">
         <button class="mode-card" type="button" data-start="auto">
-          <svg class="icon mode-icon" aria-hidden="true"><use href="#i-cards"></use></svg>
+          <img class="mode-icon" src="icons/tarot-cards-star-moon.png" alt="" width="44" height="44">
           <span class="mode-title">系統自動抽牌</span>
           <span class="mode-desc">沒有牌也能占卜</span>
         </button>
         <button class="mode-card" type="button" data-start="manual">
-          <svg class="icon mode-icon" aria-hidden="true"><use href="#i-hand"></use></svg>
+          <img class="mode-icon" src="icons/hand-holding-tarot-card.png" alt="" width="44" height="44">
           <span class="mode-title">實體牌手動輸入</span>
           <span class="mode-desc">用自己的牌，輸入抽到的結果</span>
         </button>
@@ -263,17 +263,14 @@
 
   <footer class="site-footer">
     <div class="install-shortcut">
-      <button type="button" class="btn btn-ghost" id="installApp" aria-describedby="installHint"><svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>安裝成 App</button>
+      <button type="button" class="btn btn-install" id="installApp" aria-describedby="installHint"><svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>安裝成 App</button>
       <p id="installHint" class="small muted" aria-live="polite">加入主畫面或桌面，下次一點就能開啟問牌。</p>
     </div>
     <div class="footer-links">
-    <button type="button" class="link-btn" data-info="disclaimer">免責聲明</button>
-    <span aria-hidden="true">・</span>
-    <button type="button" class="link-btn" data-info="privacy">隱私說明</button>
-    <span aria-hidden="true">・</span>
-    <button type="button" class="link-btn" data-info="credits">牌圖出處</button>
-    <span aria-hidden="true">・</span>
-    <button type="button" class="link-btn" data-info="about">關於本站</button>
+      <button type="button" class="link-btn" data-info="disclaimer">免責聲明</button>
+      <button type="button" class="link-btn" data-info="privacy">隱私說明</button>
+      <button type="button" class="link-btn" data-info="credits">牌圖出處</button>
+      <button type="button" class="link-btn" data-info="about">關於本站</button>
     </div>
   </footer>
 
@@ -290,17 +287,11 @@
 
   <!-- 設定 -->
   <dialog id="settingsDialog" class="dialog">
-    <form method="dialog" class="dialog-body" id="settingsForm">
+    <form method="dialog" class="dialog-body" id="settingsForm" autocomplete="off">
       <h2>設定</h2>
       <h3>AI 問題整理</h3>
-      <p class="muted small">填入你自己的 OpenAI API key，按「✨ AI 幫我整理問題」時，網頁會直接呼叫 OpenAI。沒有 key 也能用免費的複製貼上方式。</p>
-      <ul class="small notes">
-        <li><strong>ChatGPT Plus 訂閱不包含 API key。</strong>API key 要另外到 platform.openai.com 申請並預先儲值，費用和 ChatGPT 月費分開計算。</li>
-        <li>key 只存在你的瀏覽器，費用由你的 OpenAI 帳戶支付。</li>
-        <li>你的問題會從瀏覽器直接送到 OpenAI，適用 OpenAI 的隱私政策。</li>
-        <li>不要在公用電腦上選「記住在這台裝置」。</li>
-        <li><strong>請自己備份 key。</strong>清除瀏覽資料（Cookie 和網站資料）、換瀏覽器或換裝置後，這裡記住的 key 就會不見；OpenAI 的 key 建立後只會完整顯示一次，沒備份就只能重新建立。建議存在密碼管理工具，不要存在一般的記事本或聊天紀錄裡。</li>
-      </ul>
+      <p class="muted small">填入 key 即可一鍵整理問題；不填也能複製 Prompt 使用。</p>
+      <p class="muted small">API 費用另計，不包含在 ChatGPT 訂閱內。</p>
       <label class="field-label" for="sKey">OpenAI API key</label>
       <div class="key-field">
         <input id="sKey" class="input" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
@@ -308,13 +299,19 @@
       </div>
       <fieldset class="radio-row">
         <legend class="field-label">保存方式</legend>
-        <label><input type="radio" name="keyRemember" value="session" checked> 只用這一次（關閉分頁就清除）</label>
-        <label><input type="radio" name="keyRemember" value="local"> 記住在這台裝置</label>
+        <label><input type="radio" name="keyRemember" value="session" checked> 本次使用（關閉分頁清除）</label>
+        <label><input type="radio" name="keyRemember" value="local"> 記住此裝置</label>
       </fieldset>
-      <label class="field-label" for="sModel">模型名稱</label>
-      <input id="sModel" class="input" list="modelList" spellcheck="false">
-      <datalist id="modelList"></datalist>
-      <p class="muted small">按「測試連線」會列出你的帳戶可用的模型。</p>
+      <p class="muted small">Key 僅存於此瀏覽器，請自行備份；清除資料或換裝置後需重新填入。公用電腦請選「本次使用」。</p>
+      <label class="field-label" for="sModel">模型</label>
+      <select id="sModel" class="input" name="tarot-model-choice" aria-describedby="modelHint"></select>
+      <label class="check small"><input id="showAllModels" type="checkbox">顯示其他模型</label>
+      <div id="customModelField" hidden>
+        <label class="field-label" for="sModelCustom">自訂模型 ID</label>
+        <input id="sModelCustom" class="input" type="text" name="tarot-model-id" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="輸入完整模型 ID">
+      </div>
+      <p class="muted small" id="modelHint" aria-live="polite"></p>
+      <p class="muted small">Standard・US$／百萬 tokens・<a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener noreferrer">官方價格</a>（2026-10-28）</p>
       <p class="status-line" id="keyStatus" aria-live="polite"></p>
       <div class="dialog-actions">
         <button class="btn btn-ghost" type="button" id="testKey">測試連線</button>
@@ -360,8 +357,8 @@
   <script src="js/background.js?v=20261027b"></script>
   <script src="js/prompt.js?v=20261027b"></script>
   <script src="js/storage.js?v=20261027b"></script>
-  <script src="js/ai.js?v=20261028a"></script>
-  <script src="js/app.js?v=20261028a"></script>
+  <script src="js/ai.js?v=20261028c"></script>
+  <script src="js/app.js?v=20261028d"></script>
   <script src="js/install.js?v=20261027c"></script>
 </body>
 </html>

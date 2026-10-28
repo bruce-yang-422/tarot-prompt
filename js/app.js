@@ -1349,10 +1349,56 @@
   // ---------- 設定 ----------
 
   const settingsDlg = $('#settingsDialog');
+  const CUSTOM_MODEL = '__custom__';
+  let availableModels = [];
+
+  function selectedModel() {
+    return $('#sModel').value === CUSTOM_MODEL ? $('#sModelCustom').value.trim() : $('#sModel').value;
+  }
+
+  function updateModelHint() {
+    const model = T.ai.budgetModelInfo(selectedModel());
+    $('#modelHint').textContent = model
+      ? `輸入 $${model.input.toFixed(2)}／輸出 $${model.output.toFixed(2)}`
+      : T.ai.isDeprecatedModel(selectedModel()) ? '已公告停用，請換模型。' : '請確認此模型的價格與支援功能。';
+  }
+
+  function renderModelChoices(current) {
+    const selected = current && !T.ai.isDeprecatedModel(current) ? current : T.ai.DEFAULT_MODEL;
+    const candidates = $('#showAllModels').checked ? availableModels : T.ai.budgetModels(availableModels);
+    const models = [...new Set([T.ai.DEFAULT_MODEL, ...candidates, selected])];
+    $('#sModel').replaceChildren(
+      ...models.map((id) => {
+        const info = T.ai.budgetModelInfo(id);
+        return new Option(`${id}${info ? `（${info.label}）` : id === selected ? '（目前設定）' : ''}`, id);
+      }),
+      new Option('自訂模型…', CUSTOM_MODEL)
+    );
+    $('#sModel').value = selected;
+    $('#customModelField').hidden = true;
+    $('#sModelCustom').value = '';
+    updateModelHint();
+  }
+
+  $('#showAllModels').addEventListener('change', () => renderModelChoices(selectedModel()));
+  $('#sModelCustom').addEventListener('input', updateModelHint);
+
+  $('#sModel').addEventListener('change', () => {
+    const custom = $('#sModel').value === CUSTOM_MODEL;
+    $('#customModelField').hidden = !custom;
+    if (custom) $('#sModelCustom').focus();
+    updateModelHint();
+  });
+
+  $('#sKey').addEventListener('input', () => {
+    availableModels = [];
+    renderModelChoices(selectedModel());
+    $('#keyStatus').textContent = 'Key 已變更，請測試連線。';
+  });
 
   function keyStatusText() {
-    if (!T.store.getKey()) return '尚未設定 API key。';
-    return T.store.keyRemembered() ? '已設定，記住在這台裝置。' : '已設定，只用這一次（關閉分頁就清除）。';
+    if (!T.store.getKey()) return '尚未設定 key。';
+    return T.store.keyRemembered() ? 'Key 已設定・記住此裝置' : 'Key 已設定・本次使用';
   }
 
   $('#openSettings').addEventListener('click', () => {
@@ -1361,8 +1407,10 @@
     $('#sKey').type = 'password';
     setKeyVisible(false);
     $(`input[name="keyRemember"][value="${T.store.keyRemembered() ? 'local' : 'session'}"]`).checked = true;
-    $('#sModel').value = settings.ai.model || T.ai.DEFAULT_MODEL;
+    $('#showAllModels').checked = false;
+    renderModelChoices(settings.ai.model || T.ai.DEFAULT_MODEL);
     $('#keyStatus').textContent = keyStatusText();
+    if (T.ai.isDeprecatedModel(settings.ai.model || '')) $('#keyStatus').textContent += ' 原模型已公告停用，請確認新模型並儲存。';
     settingsDlg.showModal();
   });
 
@@ -1394,26 +1442,45 @@
       return;
     }
     status.textContent = '測試中…';
+    $('#testKey').disabled = true;
     try {
       const models = await T.ai.listModels(key);
-      $('#modelList').innerHTML = models.map((m) => `<option value="${esc(m)}">`).join('');
-      status.textContent = `✓ 連線成功，你的帳戶有 ${models.length} 個可用模型，可以從「模型名稱」欄位選擇。`;
+      if ($('#sKey').value.trim() !== key) return;
+      availableModels = models;
+      renderModelChoices(selectedModel());
+      const budgetCount = T.ai.budgetModels(models).length;
+      status.textContent = models.length
+        ? budgetCount ? `✓ 已連線・${budgetCount} 個省錢選項` : '✓ 已連線・請選其他模型或自訂'
+        : '✓ 已連線・未找到模型，請自訂';
     } catch (err) {
-      status.textContent = '✕ ' + err.message;
+      if ($('#sKey').value.trim() === key) status.textContent = '✕ ' + err.message;
+    } finally {
+      $('#testKey').disabled = false;
     }
   });
 
   $('#deleteKey').addEventListener('click', () => {
     T.store.clearKey();
     $('#sKey').value = '';
+    availableModels = [];
+    renderModelChoices(selectedModel());
     $('#keyStatus').textContent = '已刪除 API key。';
   });
 
   $('#saveSettings').addEventListener('click', () => {
+    const model = selectedModel();
+    if (!model) {
+      $('#keyStatus').textContent = '請輸入自訂模型的完整名稱。';
+      $('#sModelCustom').focus();
+      return;
+    }
+    if (T.ai.isDeprecatedModel(model)) {
+      $('#keyStatus').textContent = '此模型已公告停用，請改選推薦模型。';
+      return;
+    }
     const key = $('#sKey').value.trim();
     if (key) T.store.setKey(key, $('input[name="keyRemember"]:checked').value === 'local');
     else T.store.clearKey();
-    const model = $('#sModel').value.trim();
     settings.ai = { model: model === T.ai.DEFAULT_MODEL ? '' : model };
     T.store.saveSettings({ ai: settings.ai });
     settingsDlg.close();
