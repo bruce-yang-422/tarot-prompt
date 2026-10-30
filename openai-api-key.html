@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="zh-Hant"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none';">
+  <title>OpenAI 註冊與 API key 申請教學｜問牌 Prompt</title>
+  <meta name="description" content="OpenAI 註冊、Email 驗證、API key 申請、付款儲值與安全保護教學，手機與電腦都能跟著操作。">
+  <meta name="theme-color" content="#100e18">
+  <link rel="canonical" href="https://tarot.stack-base.com/openai-api-key.html">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="stylesheet" href="css/style.css?v=20261030i">
+</head>
+<body class="guide-page">
+  <a class="skip-link" href="#guide">跳到教學內容</a>
+  <header class="topbar">
+    <a class="brand" href="./"><img class="brand-logo" src="icons/logo-128.png" alt="" width="30" height="30">問牌 <span>Prompt</span></a>
+    <a class="topnav-btn" href="./">回問牌</a>
+  </header>
+  <main id="guide" class="view key-guide" tabindex="-1">
+    <header class="guide-intro">
+      <p class="guide-eyebrow">AI 設定教學</p>
+      <h1>申請你的 OpenAI API key</h1>
+      <p class="muted">照中文說明完成申請、保存 key，再回問牌設定。需要時再展開截圖與補充說明。</p>
+      <a class="btn btn-primary" href="https://platform.openai.com/home" target="_blank" rel="noopener noreferrer">開啟 OpenAI Platform ↗</a>
+      <p class="small muted">官方網站會在新分頁開啟，可以對照這份教學操作。</p>
+    </header>
+
+    <nav class="guide-nav" aria-label="教學章節">
+      <a href="#signup">快速申請</a><a href="#use-key">問牌設定</a>
+      <a href="#payment">付款儲值</a>
+      <a href="#security">安全提醒</a>
+    <a href="#faq">常見問題</a></nav>
+
+    <aside class="guide-note"><strong>先記住這三件事</strong><ul class="guide-checklist"><li>完整 key 只在建立時立即複製保存；沒保存就需要重建。</li><li>建立 key 不代表已有額度；API 使用與 ChatGPT 訂閱分開管理。</li><li>問牌會在瀏覽器保存你填入的 key，沒有另外加密。若不想填入 key，可使用「複製 Prompt」。</li></ul></aside>
+
+    <ol class="guide-steps"><li id="signup"><h2>註冊並完成信箱驗證</h2><div class="guide-quick-copy"><p>開啟 <a href="https://platform.openai.com/" target="_blank" rel="noopener noreferrer">OpenAI Platform ↗</a>，輸入 Email，點 <b>Continue（繼續）</b>；也可選擇 Google、Apple 或 Microsoft 登入。</p><p>若收到驗證信，把信中的驗證碼填回官方頁面，再點「繼續」。收不到信時先檢查垃圾郵件。</p></div><details class="guide-screenshot"><summary>查看截圖：註冊／登入入口</summary><figure class="guide-shot">
+          <a href="images/guide/openai-first-visit.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大首次開啟 OpenAI Platform 的畫面"><img src="images/guide/openai-first-visit.png" alt="首次開啟 OpenAI Platform，中央可輸入 Email，或選擇畫面提供的其他登入方式。" width="2547" height="1453"></a>
+          <figcaption>首次開啟、尚未登入時的入口。點圖可另開放大。</figcaption>
+        </figure></details><details class="guide-screenshot"><summary>查看截圖：輸入信箱驗證碼</summary><figure class="guide-shot">
+          <a href="images/guide/openai-email-signup.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大 Email 註冊驗證畫面"><img src="images/guide/openai-email-signup.png" alt="Email 註冊後的驗證畫面，要求輸入寄到信箱的驗證碼；Email 已遮蔽。" width="2547" height="1453" loading="lazy"></a>
+          <figcaption>Email 註冊時的驗證步驟；圖片中的 Email 已事先遮蔽。驗證碼只填在官方頁面。</figcaption>
+        </figure></details><details class="guide-screenshot"><summary>查看截圖：信箱收到的驗證信</summary><figure class="guide-shot guide-shot--mobile">
+          <a href="images/guide/openai-verification-email-redacted.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大驗證信截圖（驗證碼已遮蔽）"><img src="images/guide/openai-verification-email-redacted.png" alt="手機信箱收到 OpenAI 臨時驗證碼的信件，驗證碼區域已遮蔽。" loading="lazy"></a>
+          <figcaption>信箱收到的驗證信。只保存遮蔽後的教學圖片；驗證碼不要分享給其他人。</figcaption>
+        </figure></details></li><li><h2>填寫姓名、年齡與專案</h2><div class="guide-quick-copy"><p>填入個人姓名與年齡，點「繼續」。接著填組織名稱 <b>Organization name</b>（個人使用可填 <b>Personal</b>），專案名稱 <b>Project name</b> 可保留 <b>Default project</b>，再點 <b>Continue（繼續）</b>。</p></div><details class="guide-screenshot"><summary>查看截圖：姓名與年齡</summary><figure class="guide-shot guide-shot--mobile">
+          <a href="images/guide/openai-name-age.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大填寫個人姓名與年齡的畫面"><img src="images/guide/openai-name-age.png" alt="驗證碼通過後的個人資料畫面，包含全名、年齡欄位與繼續按鈕。" width="563" height="1001" loading="lazy"></a>
+          <figcaption>通過 Email 驗證後，填寫個人姓名與年齡，再點「繼續」。</figcaption>
+        </figure></details><details class="guide-screenshot"><summary>查看截圖：組織與專案名稱</summary><figure class="guide-shot guide-shot--mobile">
+          <a href="images/guide/openai-organization-project.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大建立組織與第一個專案的畫面"><img src="images/guide/openai-organization-project.png" alt="OpenAI Platform 歡迎畫面，包含 Organization name、Project name 與 Continue 按鈕；登入信箱已遮蔽。" width="563" height="1001" loading="lazy"></a>
+          <figcaption>姓名與年齡之後的步驟：設定組織與第一個專案，再點 Continue。信箱已遮蔽。</figcaption>
+        </figure></details></li><li><h2>選擇方案並建立 key</h2><div class="guide-quick-copy"><p>若先選 <b>Free（免費）</b> 完成設定，接著在 <b>API key name（key 名稱）</b> 填「問牌 Prompt」，點 <b>Generate API Key（建立 API key）</b>。</p><p><strong>Free 的模型與用量有限制；建立 key 不代表已有可用額度。</strong>需要購買額度時，請看下方<a href="#payment">付款與儲值</a>。</p></div><details class="guide-screenshot"><summary>查看截圖：選擇方案</summary><figure class="guide-shot">
+          <a href="images/guide/openai-choose-plan.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大選擇 API 方案的畫面"><img src="images/guide/openai-choose-plan.png" alt="建立組織與專案後的 Choose your plan 畫面，提供 Free、Build、Launch 選項，下方可填 API credits 並前往結帳。" width="2547" height="1453" loading="lazy"></a>
+          <figcaption>建立組織與專案後，選擇 API 方案。截圖中的 Build 已選取，購買額度為 US$5；這只是畫面範例。</figcaption>
+        </figure></details><details class="guide-screenshot"><summary>查看截圖：為 key 命名並建立</summary><figure class="guide-shot">
+          <a href="images/guide/openai-free-generate-key.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大選擇 Free 後建立 API key 的畫面"><img src="images/guide/openai-free-generate-key.png" alt="選擇 Free 後的 Make your first API call 畫面，包含 API key name、Generate API Key 與 I'll do this later。" width="2547" height="1453" loading="lazy"></a>
+          <figcaption>Free 方案的下一步：為 key 命名並建立；也可選擇稍後處理。</figcaption>
+        </figure></details></li><li id="save-key"><h2>立即複製並保存完整 key</h2><div class="guide-quick-copy"><p>點 <b>key 欄位旁的 Copy（複製）</b>，把完整 key 保存到安全的位置。下方的程式範例不用執行，也不用複製整段程式。保存後點 <b>Continue（繼續）</b>。</p><p><strong>沒保存或找不到完整 key，就必須重建。</strong>清單只顯示縮略內容，不能取回完整 key。不要分享自己的 key。</p></div><details class="guide-screenshot"><summary>查看截圖：複製 key（手機）</summary><figure class="guide-shot guide-shot--mobile">
+          <a href="images/guide/openai-key-created-mobile.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大手機版建立 key 完成畫面"><img src="images/guide/openai-key-created-mobile.png" alt="手機版建立 key 完成畫面，key 欄位旁有 Copy 按鈕，下方有程式呼叫範例。" loading="lazy"></a>
+          <figcaption>手機版：點 key 欄位右側的 Copy。若要繼續完成初次設定，向下捲動尋找 Continue。</figcaption>
+        </figure></details><details class="guide-screenshot"><summary>查看截圖：複製 key（電腦）</summary><figure class="guide-shot">
+          <a href="images/guide/openai-key-created-desktop.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大電腦版建立 key 完成畫面"><img src="images/guide/openai-key-created-desktop.png" alt="電腦版建立 key 完成畫面，上方有 Copy，下方有程式範例與 Continue。" loading="lazy"></a>
+          <figcaption>電腦版：先 Copy 並保存 key，再點 Continue。請使用你自己建立的 key。</figcaption>
+        </figure></details><details class="guide-extra"><summary>補充：保存 key 與初次設定畫面</summary><div class="guide-extra-body">
+
+        <p>建立完成後，立即複製完整的 secret key，並放在你能安全保管的位置。不要把 key 貼到聊天、公開截圖或分享給別人。</p>
+        <p>初次設定中點完 <b lang="en">Generate API Key</b> 後，會出現下方畫面。請點<strong>上方 key 欄位旁的 Copy</strong>，複製完整 key，再安全備份。下方 <b lang="en">Try out your new API key</b> 是程式呼叫範例；設定問牌只需貼上 key，無須執行範例或複製整段程式。</p>
+
+
+
+
+        <p>保存完成後，點 <b lang="en">Continue</b> 進入首頁，依下一步確認額度，再<a href="#use-key">回問牌填入並儲存</a>。請使用你自己複製的完整 key。</p>
+        <p>若忘記保存或懷疑外洩，回到官方 API Keys 頁面撤銷舊 key，再建立新的。<a href="https://developers.openai.com/api/docs/guides/production-best-practices" target="_blank" rel="noopener noreferrer">官方 key 管理說明 ↗</a></p>
+      </div></details></li><li id="use-key"><h2>回問牌填入並儲存</h2>
+
+        <ol class="guide-checklist">
+          <li>切回原本的問牌分頁，開啟右上角「設定」。</li>
+          <li>在「管理 API keys」找到 OpenAI，點「新增 key」或「編輯」。</li>
+          <li>貼上完整 key，選擇「本次使用」或「記住此裝置」。</li>
+          <li>離開輸入欄位後會載入模型，也可以點「更新模型」。</li>
+          <li>在「使用模型」選擇 OpenAI 的模型，再點「儲存」。</li>
+        </ol>
+        <p class="muted small">問牌將 key 保存在你的瀏覽器，並由瀏覽器直接向 OpenAI 發送請求。公用裝置請選「本次使用」；清除瀏覽器資料或換裝置後，需要重新填入。</p>
+        <a class="btn btn-primary" href="./">回問牌</a>
+      </li></ol><details class="guide-extra"><summary>補充：完整註冊流程、方案與欄位翻譯</summary><div class="guide-extra-body">
+
+        <p>第一次前往 <a href="https://platform.openai.com/" target="_blank" rel="noopener noreferrer">OpenAI Platform ↗</a>，尚未登入時會看到下方入口。可輸入 Email 並點 <b lang="en">Continue</b>，或使用畫面提供的 Google、Apple、Microsoft 等登入方式；依指示完成註冊或登入。</p>
+
+        <p>使用 Email 註冊時，若出現「查看你的收件匣」，請到該信箱收取驗證碼，回到官方頁面輸入後點「繼續」。若沒收到信，先檢查垃圾郵件或使用「重新傳送電子郵件」。</p>
+
+        <p>信箱中會收到 OpenAI 的臨時驗證碼信件，如下圖。請將<strong>你自己收到的驗證碼</strong>填回上一個官方驗證畫面；教學圖片中的驗證碼已遮蔽。</p>
+
+        <p>輸入驗證碼並通過驗證後，會接著出現「你的年齡是？」畫面。請依欄位填入<strong>個人姓名與年齡</strong>，閱讀畫面上的條款與隱私權政策，再點「繼續」。</p>
+
+        <p>填完姓名與年齡後，下一步是 <b lang="en">Welcome to OpenAI Platform</b>，需要為組織與第一個專案命名。</p>
+        <dl class="guide-fields">
+          <div><dt>Organization name</dt><dd>填入方便辨識的組織名稱；個人使用可填 <b lang="en">Personal</b>。</dd></div>
+          <div><dt>Project name</dt><dd>可保留 <b lang="en">Default project</b>，或改為「問牌 Prompt」等容易辨識的名稱。</dd></div>
+        </dl>
+        <p>確認下方 <b lang="en">Signed in with</b> 顯示的是你要使用的帳戶，再點 <b lang="en">Continue</b> 繼續。若登入了其他帳戶，可先點 <b lang="en">Use another account</b> 切換。</p>
+
+        <p>接著會顯示 <b lang="en">Choose your plan</b>，讓你選擇 API 使用方案。下圖是此步驟的畫面，方案與金額請以你的帳戶當下顯示為準。</p>
+        <dl class="guide-fields">
+          <div><dt>Free</dt><dd>畫面提供的免費體驗選項，模型與用量有限制；能否用於問牌，仍需確認可用模型與 API 權限。</dd></div>
+          <div><dt>Build</dt><dd>截圖顯示從 US$5 起，可在下方 <b lang="en">API credits</b> 填寫購買額度，再點 <b lang="en">Continue to checkout</b> 前往結帳。</dd></div>
+          <div><dt>Launch</dt><dd>截圖顯示從 US$100 起，提供較高用量與速率限制。請依實際需要選擇。</dd></div>
+        </dl>
+
+        <p>若選擇付費方案，結帳前先確認購買額度、總額與付款條件；詳細操作可看下方的<a href="#payment">付款與儲值方式</a>。畫面中的 tokens 數量是估算，實際可用量依模型與輸入／輸出內容而異。</p>
+        <p>選擇 <b lang="en">Free</b> 後，會進入 <b lang="en">Make your first API call</b>。在 <b lang="en">API key name</b> 填入方便辨識的名稱，例如「問牌 Prompt」，再點 <b lang="en">Generate API Key</b> 建立 key。</p>
+
+        <p>建立後，請立即<a href="#save-key">複製並妥善保存 key</a>，再<a href="#use-key">回問牌填入</a>，不必再重複建立。建立成功仍需確認 Free 方案的模型、用量與權限是否支援問牌。</p>
+        <p>若暫時不建立，可點 <b lang="en">I'll do this later</b>，之後再從下方介紹的 <b lang="en">API Keys</b> 頁面建立。</p>
+        <p class="muted small">依官方畫面完成其餘初次設定。進入首頁後，確認目前選取的專案，後面建立的 key 會屬於該專案。</p>
+      </div></details><details class="guide-extra" id="first-home"><summary>首次首頁：查看建立狀態與剩餘額度</summary><div class="guide-extra-body">
+
+        <p>完成初次設定後會進入 <b lang="en">Home</b>。下方是選擇 Free 並建立 key 後，第一次進入首頁的電腦版與手機版畫面。</p>
+        <h3>電腦版首頁</h3>
+        <details class="guide-screenshot"><summary>查看截圖：首次首頁（電腦）</summary><figure class="guide-shot">
+          <a href="images/guide/openai-first-home-desktop.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大首次進入首頁的電腦版畫面"><img src="images/guide/openai-first-home-desktop.png" alt="新帳戶電腦版 Home，Get started 的 Create an API key 已勾選，Credit remaining 為 US$0，並有新增點數按鈕。" width="2547" height="1453" loading="lazy"></a>
+          <figcaption>電腦版：左側可進入 API Keys；首頁顯示初次設定進度與可用餘額。</figcaption>
+        </figure></details>
+        <h3>手機版首頁與餘額</h3>
+        <details class="guide-screenshot"><summary>查看截圖：首次首頁（手機）</summary><figure class="guide-shot guide-shot--mobile">
+          <a href="images/guide/openai-first-home-mobile.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大首次進入首頁的手機版畫面"><img src="images/guide/openai-first-home-mobile.png" alt="手機版 Home 的 Get started 卡片，Create an API key 已勾選，下方有 Test models 與新增點數。" width="563" height="1001" loading="lazy"></a>
+          <figcaption>手機版：Create an API key 的綠色勾選代表此項已完成。Dismiss 可收起入門提示。</figcaption>
+        </figure></details>
+        <p>手機版可向下捲動查看 <b lang="en">Credit remaining</b>。這個新帳戶範例顯示 <b lang="en">US$0.00</b>，表示此處的可用餘額為零；<strong>建立 key 不會自動完成儲值</strong>。實際可用功能仍依帳戶的免費方案與額度限制為準。</p>
+        <details class="guide-screenshot"><summary>查看截圖：查看餘額（手機）</summary><figure class="guide-shot guide-shot--mobile">
+          <a href="images/guide/openai-first-home-balance-mobile.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大手機版首次進入首頁的餘額畫面"><img src="images/guide/openai-first-home-balance-mobile.png" alt="手機版首頁向下捲動後，Credit remaining 顯示 US$0.00，下方有新增點數按鈕。" width="563" height="1001" loading="lazy"></a>
+          <figcaption>手機版向下捲動後的餘額區塊，黃色「新增點數」可前往購買 API 額度。</figcaption>
+        </figure></details>
+        <p>需要購買額度時，點「新增點數」或畫面中的「前往帳單」，再依<a href="#payment">付款與儲值方式</a>操作。<b lang="en">Test models</b> 與開發者快速入門可依需要使用；回問牌設定只需保存好的 key。</p>
+      </div></details><details class="guide-extra" id="manage-keys"><summary>已有 key：查看、撤銷或重新建立</summary><div class="guide-extra-body">
+
+        <p>若已在初次設定中建立並保存 key，可直接<a href="#use-key">回問牌填入</a>。以下適用於選擇稍後建立，或之後需要新增／管理 key 的情況。</p>
+        <p><strong>電腦：</strong>點左側選單的 <b lang="en">API Keys</b>。</p>
+        <p><strong>手機：</strong>點右上角的選單圖示「☰」，在 <b lang="en">Dashboard</b> 下找到 <b lang="en">API Keys</b>。</p>
+        <p>也可以直接開啟 <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">官方 API Keys 頁面 ↗</a>。</p>
+        <p>若已在初次設定中建立 key，進入清單就能看到它。下圖的 <b lang="en">1 result</b> 與 <b lang="en">My Test Key</b>，表示此範例已經有一把 key。<strong>只有在建立當下已複製並保存完整 key，才可以直接沿用，不必重建。</strong></p>
+        <h3>電腦版：確認已建立的 key</h3>
+        <details class="guide-screenshot"><summary>查看截圖：已建立的 key（電腦）</summary><figure class="guide-shot">
+          <a href="images/guide/openai-api-keys-desktop.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大電腦版 API Keys 清單"><img src="images/guide/openai-api-keys-desktop.png" alt="電腦版 API Keys 清單顯示一筆 My Test Key，狀態為 Active；右上角可建立新的 secret key。" width="2547" height="1453" loading="lazy"></a>
+          <figcaption>電腦版：清單已有 My Test Key，Status 顯示 Active；可在同一列查看建立日期、到期日與權限。</figcaption>
+        </figure></details>
+        <h3>手機版：同樣可看到已建立的 key</h3>
+        <details class="guide-screenshot"><summary>查看截圖：已建立的 key（手機）</summary><figure class="guide-shot guide-shot--mobile">
+          <a href="images/guide/openai-api-keys-mobile.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大手機版 API Keys 清單"><img src="images/guide/openai-api-keys-mobile.png" alt="手機版 API Keys 清單顯示 1 result 與 My Test Key，該列右側有編輯與刪除圖示。" width="563" height="1001" loading="lazy"></a>
+          <figcaption>手機版：下方清單可看到 My Test Key。欄位較多時，可在表格內左右滑動查看。</figcaption>
+        </figure></details>
+        <p><strong>清單中的縮略 Secret Key 與 Tracking ID 都不能取代完整 key。</strong>回問牌時請貼上建立當下複製並保存的完整 key；不要將 Tracking ID 旁的複製圖示誤認為複製完整 secret key。</p>
+        <p>已保存完整 key 時，可直接<a href="#use-key">回問牌填入</a>。<strong>如果建立時沒有保存，或已經找不到完整 key，就必須重新建立</strong>；清單無法重新顯示完整 secret key。請點 <b lang="en">＋ Create new secret key</b>，依下一步填寫，並在建立後立即複製保存。</p>
+        <p>忘記內容或不再使用的舊 key，可以在清單該列右側點垃圾桶圖示撤銷。<strong>撤銷後，該筆資料仍會留在清單中，狀態改為 Revoked，且無法再編輯或使用。</strong>使用那把 key 的應用程式也無法再用它發送請求；若仍有應用程式在使用，先更新為新 key，再撤銷舊 key。</p>
+      </div></details><details class="guide-extra"><summary>補充：手動新增 key 的設定</summary><div class="guide-extra-body">
+
+        <p>在 <b lang="en">Create new secret key</b> 視窗中，依照以下方式設定：</p>
+        <dl class="guide-fields">
+          <div><dt>Owned by</dt><dd>個人使用選 <b lang="en">You</b>。</dd></div>
+          <div><dt>Name <span class="muted">（選填）</span></dt><dd>填入方便辨識的名稱，例如「問牌 Prompt」。</dd></div>
+          <div><dt>Project</dt><dd>選擇要使用的專案；若只有 <b lang="en">Default project</b>，可以選它。</dd></div>
+          <div><dt>有效期限</dt><dd>若有此欄位，選擇適合的到期時間。到期後需建立新 key 並回問牌更新；部分手機畫面可能不顯示此欄。</dd></div>
+          <div><dt>Permissions</dt><dd><b lang="en">All</b> 可用來完成設定，但權限較廣。若熟悉權限設定，可選 <b lang="en">Restricted</b>，允許讀取模型清單與呼叫 Chat Completions。<b lang="en">Read only</b> 無法產生 AI 回覆。</dd></div>
+        </dl>
+        <p>確認後，點 <b lang="en">Create secret key</b>。若按鈕無法點選，先檢查專案、有效期限等欄位是否已依畫面要求完成。</p>
+      </div></details>
+
+    <section id="payment" class="guide-section" aria-labelledby="paymentTitle"><h2 id="paymentTitle">付款與儲值方式</h2><ol class="guide-checklist"><li>在首頁點黃色 <b>Add credits／新增點數</b>，直接進入計費頁。也可從左下角帳戶選單 → <b>Organization settings（組織設定）→ Billing（計費）</b>。</li><li>查看 <b>Credit remaining（剩餘額度）</b>。初次付款點 <b>Add payment details（新增付款資料）</b>，填卡號、有效期與安全碼，再點 <b>Continue（繼續）</b>。</li><li>在 <b>Payment methods（付款方式）</b> 看到卡片，代表卡片已加入；不代表已完成儲值。</li><li>回到 <b>Overview（總覽）</b>，點 <b>Add to credit balance／Buy credits（購買額度）</b>，輸入金額並選擇付款卡片。</li><li>確認是否開啟 <b>Use auto-reload（自動儲值）</b>；只想手動付款就關閉，再依畫面完成付款確認與銀行驗證。</li><li>付款後回總覽確認餘額，並在 <b>Billing history（帳單紀錄）</b> 核對付款；若尚未更新，先查交易狀態，避免重複付款。</li></ol><p><strong>最低購買 US$5，預設金額 US$10；購買的額度一年後到期。</strong>初次設定自動儲值預設開啟，付款前請確認。<a href="https://help.openai.com/en/articles/8264644-setting-up-and-managing-prepaid-api-billing" target="_blank" rel="noopener noreferrer">官方規定 ↗</a></p><details class="guide-screenshot"><summary>查看截圖：黃色新增點數入口</summary><figure class="guide-shot">
+        <a href="images/guide/openai-home.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大首頁新增點數入口"><img src="images/guide/openai-home.png" alt="OpenAI Home 首頁，Credit remaining 區塊中的黃色 Add credits（新增點數）按鈕是儲值入口。" width="2547" height="1453" loading="lazy"></a>
+        <figcaption>方式一：點首頁餘額區塊的黃色「新增點數」（英文介面為 Add credits）。</figcaption>
+      </figure></details><details class="guide-screenshot"><summary>查看截圖：組織設定入口</summary><figure class="guide-shot guide-shot--mobile">
+        <a href="images/guide/openai-organization-settings-menu.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大帳戶選單中的 Organization settings 入口"><img src="images/guide/openai-organization-settings-menu.png" alt="左下角帳戶選單已展開，紅框標出 Organization settings，從此處進入組織設定再開啟 Billing。" loading="lazy"></a>
+        <figcaption>方式二：展開左下角帳戶選單 → Organization settings → Billing。</figcaption>
+      </figure></details><details class="guide-screenshot"><summary>查看截圖：Billing 計費總覽</summary><figure class="guide-shot">
+        <a href="images/guide/openai-billing-overview.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大 Billing 計費總覽畫面"><img src="images/guide/openai-billing-overview.png" alt="Billing 的 Overview 分頁，顯示 Free trial、Credit remaining US$0.00，以及 Add payment details 與 View usage 按鈕。" width="2547" height="1453" loading="lazy"></a>
+        <figcaption>Billing → Overview：初次尚未設定付款方式的範例。點首頁「新增點數」也會直接到此畫面。</figcaption>
+      </figure></details><details class="guide-screenshot"><summary>查看截圖：新增付款卡片</summary><figure class="guide-shot">
+        <a href="images/guide/openai-add-payment-details.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大新增付款資料視窗"><img src="images/guide/openai-add-payment-details.png" alt="Add payment details 視窗，包含卡號、有效期、安全碼欄位，以及 Cancel 和 Continue 按鈕；所有欄位皆為空白。" loading="lazy"></a>
+        <figcaption>新增付款資料：填寫卡號、有效期與安全碼，再點 Continue。</figcaption>
+      </figure></details><details class="guide-screenshot"><summary>查看截圖：確認卡片已加入</summary><figure class="guide-shot">
+        <a href="images/guide/openai-payment-methods-card.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大付款方式中已新增卡片的畫面"><img src="images/guide/openai-payment-methods-card.png" alt="Billing 的 Payment methods 分頁顯示已新增的 Visa 卡片，標記為 Default，下方有 Delete 與 Add payment method。" loading="lazy"></a>
+        <figcaption>Payment methods 中出現卡片，表示付款方式已加入帳戶。卡片有效期已事先遮蔽。</figcaption>
+      </figure></details><details class="guide-screenshot"><summary>查看截圖：購買點數</summary><figure class="guide-shot">
+        <a href="images/guide/openai-buy-credits.png" target="_blank" rel="noopener noreferrer" aria-label="另開放大購買 API 點數的畫面"><img src="images/guide/openai-buy-credits.png" alt="Add to credit balance 視窗，Amount to add 為 10 美元，提示可輸入 5 至 4992 美元，並可選擇付款卡片後點 Continue。" loading="lazy"></a>
+        <figcaption>購買 API 點數的範例：輸入金額、選擇付款方式，再點 Continue。</figcaption>
+      </figure></details><details class="guide-extra"><summary>完整付款說明與英文介面翻譯</summary><div class="guide-extra-body">
+
+      <p>API 的付款與 ChatGPT 訂閱分開管理。先查看 API 組織的可用額度，再決定是否儲值；有訂閱優惠額度時，也要先確認已領取到正確的組織。</p>
+      <h3>1. 開啟官方計費頁面</h3>
+      <p><strong>方式一：從首頁點黃色「新增點數」。</strong>在 <b lang="en">Home</b> 找到 <b lang="en">Credit remaining</b> 餘額區塊，點下方黃色「新增點數」按鈕，會直接進入下方的 <b lang="en">Billing</b> 畫面，不必再操作左側功能選單。手機版可向下捲動找到同一個餘額區塊。</p>
+
+      <p><strong>方式二：從左下角帳戶選單進入組織設定。</strong>點左側欄底部的帳戶／組織區塊，展開選單後，點圖中紅框標示的 <b lang="en">Organization settings</b>，再在組織設定中找到 <b lang="en">Billing</b>。</p>
+
+      <p>也可直接開啟<a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener noreferrer">官方 Billing 計費頁面 ↗</a>。若有多個組織，先確認目前選取的組織是 key 所屬的組織；看不到付款設定時，請確認自己有管理計費的權限。</p>
+      <p><strong>兩條路徑最後都會到這個 Billing 畫面。</strong>從 <b lang="en">Organization settings</b> 進入時，請點左側的 <b lang="en">Billing</b>；若剛才已點黃色「新增點數」，可直接從這裡繼續。</p>
+
+      <h3>看懂 Billing 畫面的重點</h3>
+      <p>在這個畫面，可以看到目前方案為 <b lang="en">Free trial</b>（免費試用），以及 <b lang="en">Credit remaining</b>（剩餘額度）。圖中的剩餘額度為 <b lang="en">US$0.00</b>，也就是目前顯示的 API 餘額為零。</p>
+      <p><b lang="en">Billing</b> 是「計費／帳務」。目前選取的 <b lang="en">Overview</b> 是「總覽」，可查看目前方案與剩餘額度，並進入付款與帳務設定。</p>
+      <dl class="guide-fields">
+        <div><dt>Free trial</dt><dd>「免費試用」，是此範例帳戶目前顯示的方案。是否還有可用額度，請看下方的 Credit remaining。</dd></div>
+        <div><dt>Credit remaining</dt><dd>「剩餘額度」。圖中的 <b lang="en">US$0.00</b> 表示此處顯示的 API 餘額為零。</dd></div>
+        <div><dt>API credits are separate from ChatGPT.</dt><dd>「API 額度與 ChatGPT 分開管理」。儲值 API 額度與購買 ChatGPT 訂閱是不同操作。</dd></div>
+        <div><dt>Manage your subscription</dt><dd>「管理你的訂閱」。這個連結是管理 ChatGPT 訂閱；本次要設定 API 付款資料，請使用下方的 Add payment details。</dd></div>
+        <div><dt>Add payment details</dt><dd>「新增付款資料」。<strong>第一次設定付款與儲值，請先點這個按鈕</strong>，再依接下來的畫面填寫。</dd></div>
+        <div><dt>View usage</dt><dd>「查看用量」。用來查看 API 使用情形與消耗，並非儲值按鈕。</dd></div>
+      </dl>
+      <p>上方分頁與下方功能入口，可以依需要查看：</p>
+      <dl class="guide-fields">
+        <div><dt>Payment methods</dt><dd>「付款方式」。下方的 Add or change payment method 是「新增或變更付款方式」，例如管理付款卡片。</dd></div>
+        <div><dt>Billing history</dt><dd>「帳單紀錄」。View past and current invoices 是「查看過去與目前的帳單」。</dd></div>
+        <div><dt>Credit grants</dt><dd>「獲授額度」。查看帳戶獲得的額度資訊；是否有可用額度，以帳戶實際內容為準。</dd></div>
+        <div><dt>Preferences</dt><dd>「偏好設定」。Manage billing information 是「管理帳務資料」。</dd></div>
+        <div><dt>Promotions</dt><dd>「優惠活動」。查看平台提供的優惠相關資訊；是否適用，以帳戶顯示為準。</dd></div>
+        <div><dt>Usage limits</dt><dd>「用量限制」。Set monthly spend limits 是「設定每月支出上限」。提醒與硬上限的差別，請看下方「設定費用提醒與用量上限」。</dd></div>
+        <div><dt>Pricing</dt><dd>「價格」。View pricing and FAQs 是「查看價格與常見問題」，可用來了解模型費率。</dd></div>
+      </dl>
+      <p><strong>接下來請點 Add payment details（新增付款資料）</strong>，繼續設定付款方式。</p>
+      <h3>2. 新增付款方式並手動儲值</h3>
+      <p>點 <b lang="en">Add payment details</b> 後，會出現下方的「新增付款資料」視窗。上方英文說明的意思是：請填入信用卡資料；這張卡會儲存在你的帳戶，之後可以移除。</p>
+
+      <dl class="guide-fields">
+        <div><dt>卡號</dt><dd>填入信用卡卡號。截圖右側顯示 Visa、Mastercard、JCB 與 American Express 標誌；實際是否接受該卡，仍以官方付款結果為準。</dd></div>
+        <div><dt>有效期</dt><dd>填入卡片的到期月份與年份，依欄位顯示的格式輸入。</dd></div>
+        <div><dt>安全碼</dt><dd>填入卡片上的 CVC／CVV 安全碼，通常為 3 或 4 碼；不是提款密碼，也不是銀行簡訊驗證碼。</dd></div>
+        <div><dt>Cancel</dt><dd>「取消」，關閉這個視窗。</dd></div>
+        <div><dt>Continue</dt><dd>「繼續」。確認資料後點此按鈕，依接下來的官方畫面完成後續步驟。</dd></div>
+      </dl>
+      <p>請只在 OpenAI 官方付款視窗填入卡片資料。這一步是新增付款資料，<strong>還需依後續畫面確認儲值金額與付款結果</strong>，不能只因填完卡片就認定額度已入帳。</p>
+      <h3>確認付款方式已新增</h3>
+      <p>依畫面指示完成後，開啟 <b lang="en">Billing → Payment methods</b>（付款方式）。如果設定成功，這裡應該會看到剛新增的卡片，如下圖。</p>
+
+      <dl class="guide-fields">
+        <div><dt>Payment methods</dt><dd>「付款方式」。可在此確認帳戶目前保存的卡片。</dd></div>
+        <div><dt>卡片標誌與末四碼</dt><dd>用來辨識是哪張卡片，請核對是否為你剛新增的卡片。</dd></div>
+        <div><dt>Default</dt><dd>「預設付款方式」，表示這張卡目前被設為預設卡片。</dd></div>
+        <div><dt>Delete</dt><dd>「刪除」，用來移除這個付款方式。</dd></div>
+        <div><dt>Add payment method</dt><dd>「新增付款方式」，需要加入其他卡片時使用。</dd></div>
+      </dl>
+      <p><strong>看得到卡片，代表付款方式已設定；是否已儲值成功，要另外確認剩餘額度與交易紀錄。</strong></p>
+      <h3>購買點數：Add to credit balance</h3>
+      <p>開啟購買額度入口後，會出現 <b lang="en">Add to credit balance</b>（增加可用額度）視窗。先輸入購買金額並確認付款卡片，再點 <b lang="en">Continue</b> 繼續。</p>
+
+      <dl class="guide-fields">
+        <div><dt>Amount to add</dt><dd>「要增加的金額」，以美元計價。圖中的 10 代表購買 US$10 的 API 額度。</dd></div>
+        <div><dt>Enter an amount between $5 and $4992</dt><dd>「請輸入 US$5 至 US$4,992 之間的金額」。這是截圖中該帳戶當下可輸入的範圍；上限會受帳戶的信任等級與可持有額度限制影響，請以自己的畫面為準。</dd></div>
+        <div><dt>Model pricing</dt><dd>「模型價格」，可查看不同模型的 API 費率。</dd></div>
+        <div><dt>Payment method</dt><dd>「付款方式」，選擇本次要扣款的卡片。</dd></div>
+        <div><dt>Add payment method</dt><dd>「新增付款方式」，需要換用尚未加入的卡片時使用。</dd></div>
+        <div><dt>Cancel／Continue</dt><dd>「取消／繼續」。確認購買金額與卡片後，點 Continue，依後續畫面完成付款確認。</dd></div>
+      </dl>
+      <p><strong>官方規定最低購買 US$5，預設購買金額為 US$10。</strong>預設值不等於最低金額；你可以依畫面允許的範圍調整。官方也說明，購買的額度會在一年後到期。<a href="https://help.openai.com/en/articles/8264644-setting-up-and-managing-prepaid-api-billing" target="_blank" rel="noopener noreferrer">官方預付 API 計費說明 ↗</a>（查核日期：2026-10-30）</p>
+      <h3>後續付款與入帳確認</h3>
+      <ol class="guide-checklist">
+        <li>回到 <b lang="en">Billing → Overview</b>（總覽），先查看 <b lang="en">Credit remaining</b>（剩餘額度）。如果剛才的流程已完成儲值，請先核對金額與交易紀錄，避免再次購買。</li>
+        <li>需要購買額度時，點畫面提供的 <b lang="en">Add to credit balance</b>／<b lang="en">Add credits</b>（新增額度／點數）或相應購買入口；按鈕名稱以實際畫面為準。</li>
+        <li>輸入要購買的 API credits 金額，確認付款卡片與帳單資料。第一次可先從畫面允許的小額開始，並閱讀計價幣別、總額、額度有效期限與退款條件。</li>
+        <li>確認是否啟用自動儲值，再依官方畫面提交付款；如銀行要求驗證，請在銀行提供的驗證流程完成。</li>
+        <li>付款完成後，回到 <b lang="en">Overview</b> 確認剩餘額度，並在 <b lang="en">Billing history</b> 查看交易／帳單紀錄。若餘額尚未更新，稍候重新整理並先查交易狀態，避免重複付款。</li>
+        <li>確認可用額度後，<a href="#use-key">回問牌填入完整 key、選擇模型並儲存</a>。新增卡片或儲值，都不會自動替問牌完成設定。</li>
+      </ol>
+      <p class="muted small">購買上限、可用付款方式與其他條件請以帳戶當下的官方結帳畫面為準。問牌不代收款，也不需要你的卡號、銀行驗證碼或付款截圖。</p>
+      <h3>3. 決定是否啟用自動儲值</h3>
+      <p><b lang="en">Auto recharge</b>／<b lang="en">Use auto-reload</b> 是「自動儲值」。官方說明初次設定時預設開啟 Use auto-reload；只想手動購買額度，請在確認付款前關閉。若保留開啟，請檢查觸發餘額門檻、要補回的目標餘額與每月自動儲值上限。</p>
+      <p><strong>自動儲值上限與 API 使用費用上限是不同設定。</strong>前者控制自動購買額度，後者控制 API 花費。請另外檢查下一項的用量限制。</p>
+      <h3>4. 設定費用提醒與用量上限</h3>
+      <p>在<a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener noreferrer">組織 Limits ↗</a> 或專案的 Limits 中設定每月預算。<b lang="en">Spend alert</b> 只會提醒；若要達到設定額度後阻擋請求，需確認已啟用 <b lang="en">Enforce a hard limit</b>。限制生效可能有延遲，實際記錄費用仍可能略高於設定值。<a href="https://developers.openai.com/api/docs/guides/spend-limits" target="_blank" rel="noopener noreferrer">官方費用上限說明 ↗</a></p>
+      <p>使用後可到<a href="https://platform.openai.com/usage" target="_blank" rel="noopener noreferrer">官方 Usage 用量頁 ↗</a>核對消耗；費率請查看<a href="https://developers.openai.com/api/docs/pricing" target="_blank" rel="noopener noreferrer">官方 API 價格 ↗</a>。儲值成功不會自動替問牌選模型，仍需回設定頁選擇模型並儲存。</p>
+    </div></details><details class="guide-extra"><summary>補充：API 額度與 ChatGPT 訂閱</summary><div class="guide-extra-body">
+      <strong>先確認 API 額度與費用</strong>
+      <p>建立 key 不代表已取得可用額度。請在 OpenAI Platform 確認餘額與計費設定；API 使用量會依模型計費。符合資格的 ChatGPT 訂閱可能有可領取的 API credits，是否適用請以你的帳戶為準。<a href="https://developers.openai.com/api/docs/guides/chatgpt-api-credits" target="_blank" rel="noopener noreferrer">查看官方額度說明 ↗</a></p>
+      <p>如果暫時不想設定 key，仍可用問牌抽牌、複製 Prompt，再貼到你使用的 AI 聊天工具。需要付費使用時，可先看下方的<a href="#payment">付款與儲值方式</a>。</p>
+    </div></details></section>
+
+    <section id="security" class="guide-section" aria-labelledby="securityTitle"><h2 id="securityTitle">安全保護指南</h2><ul class="guide-checklist"><li>不要把完整 key、驗證碼或卡片資料分享給他人。</li><li>為 key 設定有效期限與合適權限，定期查看用量與費用；懷疑外洩時，立即到官方 API Keys 撤銷。</li><li>問牌刪除 key 只會移除本機保存；要停用 key，必須到 OpenAI 撤銷。撤銷後清單仍會保留，狀態為 <b>Revoked</b>，無法再編輯或使用。</li><li>官方建議由後端保管 key；問牌目前由瀏覽器保存並直接呼叫 API。共用裝置請選「本次使用」，用完後刪除並關閉分頁。</li></ul><p><a href="https://help.openai.com/zh-hant/articles/5112595-best-practices-for-api-key-safety" target="_blank" rel="noopener noreferrer">OpenAI 官方安全指南（繁體中文）↗</a></p><details class="guide-extra"><summary>完整安全指南與瀏覽器保存方式</summary><div class="guide-extra-body">
+
+      <p><a href="https://help.openai.com/zh-hant/articles/5112595-best-practices-for-api-key-safety" target="_blank" rel="noopener noreferrer">閱讀 OpenAI 官方說明：API 金鑰安全的最佳實踐（繁體中文）↗</a></p>
+      <aside class="guide-note">
+        <strong>官方建議與問牌目前的使用方式</strong>
+        <p>OpenAI 官方建議避免在瀏覽器或行動 App 中部署 API key，應由自己的後端伺服器保管並發送請求。問牌目前由瀏覽器保存使用者自行填入的 key，直接向供應商發送請求，與官方建議的後端保管方式不同。</p>
+        <p>若不希望在瀏覽器中填入或保存 key，可以使用問牌的「複製 Prompt」功能，再貼到你使用的 AI 聊天工具，不需要設定 API key。</p>
+      </aside>
+      <h3>保護帳戶與登入驗證</h3>
+      <ul class="guide-checklist">
+        <li>從本頁的官方連結進入，輸入密碼或付款前檢查網址。不要透過陌生訊息中的連結登入或儲值。</li>
+        <li>在帳戶安全性設定檢查並啟用多因素驗證（MFA）。若使用 Google、Apple 或 Microsoft 登入，也請保護對應的登入帳戶。驗證碼與備用碼不要交給其他人。</li>
+      </ul>
+      <h3>把 API key 當成密碼保管</h3>
+      <ul class="guide-checklist">
+        <li>為問牌建立專用 key，使用容易辨識的名稱，設定合適的有效期限；熟悉權限設定時，使用 Restricted 限制為需要的功能。團隊成員應各自使用自己的 key，不共用同一把。</li>
+        <li>用密碼管理工具等安全方式備份。不要放在公開文件、程式碼、聊天或截圖中；分享操作畫面前遮住完整 key、Email 與不想公開的使用數字。</li>
+        <li>到期前建立新 key，回問牌更新並確認可使用，再到官方頁面撤銷舊 key。可參考<a href="https://help.openai.com/zh-hant/articles/5112595-best-practices-for-api-key-safety" target="_blank" rel="noopener noreferrer">官方 API 金鑰安全指南 ↗</a>。</li>
+      </ul>
+      <h3>了解問牌的瀏覽器保存方式</h3>
+      <p>「本次使用」將 key 保存在本分頁的 sessionStorage；「記住此裝置」將 key 保存在 localStorage。這些是瀏覽器儲存空間，<strong>問牌沒有另外加密保存 key</strong>。能存取該瀏覽器資料的人、惡意擴充功能或裝置上的惡意程式，仍可能取得 key。</p>
+      <p>優先使用自己的裝置；共用裝置請選「本次使用」，用完後在問牌設定刪除 key 並關閉分頁。問牌的 AI 請求由瀏覽器直接送往供應商，問題與背景內容也會一起傳送，填寫前請移除不必要的個人資料。</p>
+      <h3>懷疑 key 外洩或發現不明費用時</h3>
+      <ol class="guide-checklist">
+        <li>立即到<a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">官方 API Keys 頁面 ↗</a>撤銷可疑 key。</li>
+        <li>檢查 Usage、Billing、自動儲值與費用上限；如有不明交易，從官方平台的支援入口提出查詢。</li>
+        <li>檢查帳戶登入安全與裝置，排除外洩原因，再建立新 key 並回問牌更新。</li>
+      </ol>
+      <p><strong>在問牌刪除 key 或清除瀏覽器資料，只會移除本機保存。</strong>要讓舊 key 無法再被使用，必須到 OpenAI 官方頁面撤銷。</p>
+    </div></details></section>
+
+    <section class="guide-faq" aria-labelledby="faqTitle" id="faq">
+      <h2 id="faqTitle">設定時卡住了？</h2>
+      <details><summary>有 key，為什麼仍提示額度不足？</summary><p>Key 用來辨識帳戶與專案；可用額度需要另外確認。到 OpenAI Platform 的計費設定查看餘額、付款與額度狀態，再回問牌重試。</p></details>
+      <details><summary>模型清單空白或提示權限錯誤？</summary><p>確認 key 完整、尚未到期或被撤銷，而且有權限讀取模型清單與產生回覆。修改後回問牌點「更新模型」。</p></details>
+      <details><summary>手機畫面和教學不一樣？</summary><p>OpenAI 介面可能調整。先找右上角選單，再找「API Keys」與「Create new secret key」；也可使用上方提供的官方 API Keys 直達連結。</p></details>
+    </section>
+    <p class="muted small">教學更新：2026-10-30。介面欄位參考使用者提供的電腦與手機截圖，實際流程以官方頁面為準。建立 key 的基本流程可參考 <a href="https://developers.openai.com/api/docs/quickstart" target="_blank" rel="noopener noreferrer">OpenAI 官方快速入門 ↗</a>。</p>
+  </main>
+  <footer class="site-footer"><a href="./">問牌 Prompt</a></footer>
+
+
+
+</body></html>

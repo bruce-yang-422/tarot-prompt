@@ -2,12 +2,34 @@
 // - 網站本身（HTML、CSS、JS、圖示）安裝時先快取，之後一律「先連網、失敗才用快取」，確保拿到最新版
 // - 78 張牌圖（約 15MB，整個網站約 16MB）安裝時一起下載，之後「先用快取」，離線也能看到每一張牌
 //   圖檔清單讀自 images/rws-1909/manifest.json；個別圖檔下載失敗不影響安裝，之後看到時會再補存
-const SHELL_CACHE = 'wenpai-shell-v10';
+const SHELL_CACHE = 'wenpai-shell-v34';
 const IMAGE_CACHE = 'wenpai-images-v1';
 
 const SHELL_FILES = [
   './',
   'index.html',
+  'openai-api-key.html',
+  'images/guide/openai-home.png',
+  'images/guide/openai-first-visit.png',
+  'images/guide/openai-email-signup.png',
+  'images/guide/openai-verification-email-redacted.png',
+  'images/guide/openai-name-age.png',
+  'images/guide/openai-organization-project.png',
+  'images/guide/openai-choose-plan.png',
+  'images/guide/openai-free-generate-key.png',
+  'images/guide/openai-key-created-mobile.png',
+  'images/guide/openai-key-created-desktop.png',
+  'images/guide/openai-first-home-desktop.png',
+  'images/guide/openai-first-home-mobile.png',
+  'images/guide/openai-first-home-balance-mobile.png',
+  'images/guide/openai-api-keys-desktop.png',
+  'images/guide/openai-api-keys-mobile.png',
+  'images/guide/openai-add-credits-home.png',
+  'images/guide/openai-organization-settings-menu.png',
+  'images/guide/openai-billing-overview.png',
+  'images/guide/openai-add-payment-details.png',
+  'images/guide/openai-payment-methods-card.png',
+  'images/guide/openai-buy-credits.png',
   'css/style.css',
   'js/cards.js',
   'js/spreads.js',

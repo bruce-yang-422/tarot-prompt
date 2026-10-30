@@ -56,7 +56,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=20261028k">
+  <link rel="stylesheet" href="css/style.css?v=20261030i">
 </head>
 <body>
   <!-- 自製 SVG 圖示：以 <svg class="icon"><use href="#i-名稱"></use></svg> 引用 -->
@@ -292,8 +292,13 @@
       <h2 id="settingsTitle">AI 設定</h2>
       <p class="muted small settings-intro">填入 key 即可一鍵整理問題；不填也能複製 Prompt 使用。</p>
       <div class="settings-section">
-        <label class="field-label" for="sModel">使用模型</label>
-        <select id="sModel" class="input" name="tarot-model-choice" aria-describedby="modelHint modelListStatus"></select>
+        <label class="field-label" for="modelPickerToggle" id="modelPickerLabel">使用模型</label>
+        <select id="sModel" name="tarot-model-choice" hidden></select>
+        <button id="modelPickerToggle" class="input model-picker-toggle" type="button" aria-expanded="false" aria-controls="modelPickerList" aria-describedby="modelHint modelListStatus">
+          <span id="modelPickerValue">請先填入 API key</span>
+          <svg class="icon" aria-hidden="true"><use href="#i-chevron"></use></svg>
+        </button>
+        <div id="modelPickerList" class="model-picker-list" role="group" aria-labelledby="modelPickerLabel" hidden></div>
         <label class="check small"><input id="showAllModels" type="checkbox">顯示全部模型（含自訂）</label>
         <p class="muted small" id="modelListStatus" aria-live="polite"></p>
         <div id="customModelField" hidden>
@@ -305,6 +310,7 @@
       </div>
       <div class="settings-section">
         <h3 class="key-list-title">管理 API keys</h3>
+        <p class="small"><a href="openai-api-key.html" target="_blank" rel="noopener noreferrer">OpenAI 註冊與 API key 申請教學 ↗</a></p>
         <div id="apiKeyList" class="api-key-list" aria-label="各供應商 API key"></div>
         <p class="muted small">新增／編輯後按「儲存」套用；刪除立即生效。</p>
         <div id="keyEditor" class="key-editor" hidden>
@@ -378,7 +384,7 @@
   <script src="js/prompt.js?v=20261027b"></script>
   <script src="js/storage.js?v=20261028b"></script>
   <script src="js/ai.js?v=20261028h"></script>
-  <script src="js/settings.js?v=20261028d"></script>
+  <script src="js/settings.js?v=20261030a"></script>
   <script src="js/app.js?v=20261028i"></script>
   <script src="js/install.js?v=20261027c"></script>
 </body>

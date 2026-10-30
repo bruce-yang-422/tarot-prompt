@@ -114,7 +114,34 @@ class ModelSettingsTests(unittest.TestCase):
         return json.dumps([provider, model], separators=(',', ':'))
 
     def choose(self, provider, model):
-        self.page.locator('#sModel').select_option(self.option(provider, model))
+        self.page.locator('#modelPickerToggle').click()
+        value = json.dumps(self.option(provider, model))
+        self.page.locator('#modelPickerList button[data-model-value=' + value + ']').click()
+
+    def test_mobile_model_picker_fits_and_keyboard_dismisses_without_closing_settings(self):
+        self.open_settings(keys=('openai', 'google', 'claude'), show_all=True)
+        expect(self.page.locator('#sModel option')).to_have_count(11)
+        for width, height in [(320, 568), (375, 667), (412, 915), (844, 390), (1280, 800)]:
+            self.page.set_viewport_size({'width': width, 'height': height})
+            toggle = self.page.locator('#modelPickerToggle')
+            toggle.click()
+            picker = self.page.locator('#modelPickerList')
+            expect(picker).to_be_visible()
+            bounds = picker.bounding_box()
+            self.assertGreaterEqual(bounds['x'], 0)
+            self.assertLessEqual(bounds['x'] + bounds['width'], width)
+            self.assertLessEqual(bounds['height'], min(280, height * .38) + 1)
+            self.assertTrue(picker.evaluate('(el) => el.scrollWidth <= el.clientWidth'))
+            self.page.keyboard.press('Escape')
+            expect(picker).to_be_hidden()
+            expect(self.page.locator('#settingsDialog')).to_be_visible()
+            expect(toggle).to_be_focused()
+        self.page.set_viewport_size({'width': 375, 'height': 667})
+        self.choose('claude', 'claude-haiku-5-5')
+        expect(self.page.locator('#modelPickerValue')).to_contain_text('Claude · claude-haiku-5-5')
+        expect(self.page.locator('#modelPickerList')).to_be_hidden()
+        self.page.locator('#saveSettings').click()
+        self.assertEqual(self.page.evaluate('() => Tarot.store.getSettings().ai.provider'), 'claude')
 
     def test_combines_models_and_selection_controls_request_routing(self):
         self.open_settings()

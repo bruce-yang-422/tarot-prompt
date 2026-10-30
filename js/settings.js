@@ -15,6 +15,63 @@
     let generation = 0;
     const customValues = {};
 
+    function closeModelPicker() {
+      $('#modelPickerList').hidden = true;
+      $('#modelPickerToggle').setAttribute('aria-expanded', 'false');
+    }
+
+    function renderModelPicker() {
+      const select = $('#sModel');
+      const toggle = $('#modelPickerToggle');
+      toggle.disabled = select.disabled;
+      $('#modelPickerValue').textContent = select.selectedOptions[0]?.textContent || '選擇供應商與模型';
+      const groups = Array.from(select.querySelectorAll('optgroup'), (group) => {
+        const section = document.createElement('section');
+        const heading = document.createElement('h3');
+        heading.textContent = group.label;
+        section.append(heading);
+        for (const option of group.children) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'model-picker-option';
+          button.dataset.modelValue = option.value;
+          button.disabled = option.disabled;
+          button.setAttribute('aria-pressed', String(option.selected));
+          // 供應商已是分組標題，不必在每個型號重複。
+          button.textContent = option.textContent.replace(`${group.label} · `, '');
+          section.append(button);
+        }
+        return section;
+      });
+      $('#modelPickerList').replaceChildren(...groups);
+      if (select.disabled) closeModelPicker();
+    }
+
+    $('#modelPickerToggle').addEventListener('click', () => {
+      const list = $('#modelPickerList');
+      list.hidden = !list.hidden;
+      $('#modelPickerToggle').setAttribute('aria-expanded', String(!list.hidden));
+      if (!list.hidden) {
+        const active = list.querySelector('[aria-pressed="true"]') || list.querySelector('button:not(:disabled)');
+        if (active) active.focus();
+      }
+    });
+    $('#modelPickerList').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-model-value]');
+      if (!button) return;
+      $('#sModel').value = button.dataset.modelValue;
+      closeModelPicker();
+      $('#modelPickerToggle').focus();
+      $('#sModel').dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !$('#modelPickerList').hidden) {
+        event.preventDefault();
+        closeModelPicker();
+        $('#modelPickerToggle').focus();
+      }
+    });
+
     function savedModel(provider) {
       return settings.ai[modelKey(provider)] || T.ai.providerInfo(provider).defaultModel;
     }
@@ -131,6 +188,7 @@
       if (select.disabled) select.options[0].textContent = '請先填入 API key';
       const wanted = choice && valueOf(choice.provider, choice.model);
       select.value = wanted && Array.from(select.options).some((option) => option.value === wanted) ? wanted : '';
+      renderModelPicker();
       $('#modelListStatus').textContent = statuses.join('；');
       $('#testKey').disabled = PROVIDERS.some((provider) => drafts[provider] && drafts[provider].state === 'loading');
       updateModelHint();
@@ -203,6 +261,7 @@
       $('#showAllModels').checked = settings.ai.showAllModels === undefined
         ? !!(drafts[provider].key && !T.ai.budgetModelInfo(choice.model, provider)) : !!settings.ai.showAllModels;
       $('#keyEditor').hidden = true;
+      closeModelPicker();
       loadKey(provider);
       $('#sModelCustom').value = '';
       renderModelChoices();
@@ -255,6 +314,7 @@
 
     $('#sModel').addEventListener('change', () => {
       choice = selectedChoice();
+      renderModelPicker();
       if (choice && choice.model === CUSTOM) {
         $('#sModelCustom').value = customValues[choice.provider] || '';
         $('#customModelField').hidden = false;
@@ -293,7 +353,7 @@
       const hasKey = PROVIDERS.some((provider) => drafts[provider].key);
       if (hasKey && !selected) {
         $('#keyStatus').textContent = '請從上方清單選擇要使用的模型。';
-        $('#sModel').focus();
+        $('#modelPickerToggle').focus();
         return;
       }
       const model = selected && (selected.model === CUSTOM ? $('#sModelCustom').value.trim() : selected.model);
