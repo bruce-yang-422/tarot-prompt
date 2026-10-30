@@ -15,6 +15,8 @@ A tarot draw tool that turns your question, spread and cards into a structured r
 
 The app does not interpret the cards itself. It collects everything an LLM needs for a good reading — the question, background, spread positions, card orientation and card statistics — and formats it as YAML settings plus JSON card data that you can copy with one click.
 
+Drawing cards and generating prompts require no registration or API key. API integration is optional and assists with refining questions and generating background questions.
+
 **Live demo:** <https://tarot.stack-base.com>
 
 **User guide:** [OpenAI API key setup, billing, and security](https://tarot.stack-base.com/openai-api-key.html) (Traditional Chinese)
@@ -26,7 +28,11 @@ The app does not interpret the cards itself. It collects everything an LLM needs
 
 ## Features
 
-- **Homepage guide**: fan of original card art, one-tap example questions, spread thumbnails, a full worked example (cards → Prompt → AI reading), a 30-second tarot primer, and an FAQ
+- **Homepage guide**
+  - A fan of original RWS card art introduces the 78-card deck, 16 spreads, and upright/reversed orientations; automatic drawing is marked as the starting choice for new users
+  - Six example questions prefill the category and question and open the question page in automatic-draw mode; the text remains editable
+  - Six spread previews and a worked example showing the cards, a prompt excerpt, and an excerpt from an actual ChatGPT reading
+  - A “3-minute tarot primer” with eight expandable topics, plus an FAQ covering costs, prompts, privacy, and more
 - **Two ways to draw**
   - Online draw: Fisher–Yates shuffle with `crypto.getRandomValues`, 50% chance of reversal
   - Physical deck: enter the cards you drew, with search (Chinese, English and aliases), orientation toggle and "jumper" cards
@@ -76,6 +82,15 @@ python -m http.server 8000
 ```
 
 ## Configuration
+
+### First use
+
+1. Choose **系統自動抽牌 (Automatic draw)** or **實體牌手動輸入 (Physical deck input)** on the homepage. If you need a starting question, select one of the examples.
+2. Edit the question, provide background information, and choose a recommended spread or another suitable spread.
+3. Draw cards or enter your physical deck results, then copy the generated prompt into ChatGPT, Claude, or Gemini for a reading.
+4. To preview the process, expand the worked example or tarot primer on the homepage. Configure your own API key only if you want AI assistance with refining your question.
+
+### Optional API assistance
 
 The API integration is optional and configured per user in the browser:
 
