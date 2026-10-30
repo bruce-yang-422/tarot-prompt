@@ -17,7 +17,7 @@ The app does not interpret the cards itself. It collects everything an LLM needs
 
 **Live demo:** <https://tarot.stack-base.com>
 
-**Setup guide:** [OpenAI API key registration, billing, and safety guide](https://tarot.stack-base.com/openai-api-key.html) ([local page](openai-api-key.html), in Traditional Chinese)
+**User guide:** [OpenAI API key setup, billing, and security](https://tarot.stack-base.com/openai-api-key.html) (Traditional Chinese)
 
 <p>
   <img src="docs/screenshots/desktop-result.jpg" alt="Result page with the drawn spread and the generated prompt" width="640">
@@ -85,7 +85,7 @@ The API integration is optional and configured per user in the browser:
 
 Notes:
 
-- New OpenAI users can open the [registration and billing guide](openai-api-key.html) from the link under **管理 API keys (Manage API keys)**. It opens in a new tab and provides a concise Chinese walkthrough with expandable screenshots and reference details.
+- New OpenAI users can open the [user guide](https://tarot.stack-base.com/openai-api-key.html) from the link under **管理 API keys (Manage API keys)**. It opens in a new tab and provides a concise Chinese walkthrough with expandable screenshots and reference details.
 - API credits and ChatGPT subscriptions are managed separately. Create keys at [platform.openai.com](https://platform.openai.com); check your account and the [official documentation](https://developers.openai.com/api/docs/guides/chatgpt-api-credits) for any eligible subscription credit benefits.
 - Get a Google key from [Google AI Studio](https://aistudio.google.com/apikey); quota and billing depend on your Google account.
 - Get a Claude key from [Claude Console](https://platform.claude.com/settings/keys); API billing and credits depend on your Console account.

@@ -17,7 +17,7 @@
 
 **線上展示：**<https://tarot.stack-base.com>
 
-**申請教學：**[OpenAI API key 快速申請、付款儲值與安全指南](https://tarot.stack-base.com/openai-api-key.html)（[本機頁面](openai-api-key.html)）
+**使用教學：**[OpenAI API key 申請、儲值與安全設定](https://tarot.stack-base.com/openai-api-key.html)
 
 <p>
   <img src="docs/screenshots/desktop-result.jpg" alt="結果頁：牌陣圖與產生的 Prompt" width="640">
@@ -85,7 +85,7 @@ API 串接是選用功能，每位使用者在自己的瀏覽器設定：
 
 注意：
 
-- 第一次申請 OpenAI key，可點設定中「管理 API keys」下的教學連結，另開[申請與儲值教學](openai-api-key.html)。正文提供中文快速步驟，截圖與完整說明可依需要展開。
+- 第一次申請 OpenAI key，可點設定中「管理 API keys」下的教學連結，另開[使用教學](https://tarot.stack-base.com/openai-api-key.html)。正文提供中文快速步驟，截圖與完整說明可依需要展開。
 - API 額度與 ChatGPT 訂閱分開管理；API key 到 [platform.openai.com](https://platform.openai.com) 建立，是否有可領取的訂閱優惠額度，請看帳戶與[官方說明](https://developers.openai.com/api/docs/guides/chatgpt-api-credits)。
 - Google 的 key 可從 [Google AI Studio](https://aistudio.google.com/apikey) 取得；額度、計費與資料使用依 Google 帳戶方案為準。
 - Claude 的 key 可從 [Claude Console](https://platform.claude.com/settings/keys) 取得；API 費用與額度依 Console 帳戶為準。
