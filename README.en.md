@@ -17,6 +17,8 @@ The app does not interpret the cards itself. It collects everything an LLM needs
 
 **Live demo:** <https://tarot.stack-base.com>
 
+**Setup guide:** [OpenAI API key registration, billing, and safety guide](https://tarot.stack-base.com/openai-api-key.html) ([local page](openai-api-key.html), in Traditional Chinese)
+
 <p>
   <img src="docs/screenshots/desktop-result.jpg" alt="Result page with the drawn spread and the generated prompt" width="640">
   <img src="docs/screenshots/mobile-question.jpg" alt="Question step on mobile with category chips and the background questionnaire" width="180">
@@ -40,7 +42,9 @@ The app does not interpret the cards itself. It collects everything an LLM needs
 - **Optional AI assist**
   - Without an API key: copy a "refine my question" prompt to any chatbot and paste the answer back
   - With your own OpenAI, Google AI Studio, or Claude API key: refine questions and generate follow-up background questions. Recommended budget models appear by default (`gpt-6-luna`, `gpt-5.6-luna`, `gemini-3.5-flash-lite`, and `claude-haiku-5-5`); enable **顯示全部模型 (Show all models)** for other models and custom IDs
-- **PWA**: installable to the home screen; the first visit downloads the whole site in the background (about 16 MB including all 78 card images), after which it works fully offline
+  - A scrollable, in-page model menu groups choices by provider; refresh and save actions remain available at the bottom of the settings dialog on mobile
+- **OpenAI API key guide**: a Traditional Chinese walkthrough for registration, email verification, saving keys, billing, and safety. Screenshots, full translations, and reference notes are collapsed by default; mobile readers get floating topic navigation
+- **PWA**: installable to the home screen; installation caches the site, all 78 card images, and tutorial screenshots in the background. Once cached, card draws, prompt generation, and the guide work offline; AI assistance and model-list requests still require a connection
 - **SEO**: Open Graph / Twitter card previews, JSON-LD structured data, `sitemap.xml`, `robots.txt`
 - **Accessibility**: keyboard navigation, `aria-live` announcements, respects `prefers-reduced-motion`
 - **Safety**: shows crisis hotlines when self-harm related wording is detected
@@ -76,16 +80,31 @@ The API integration is optional and configured per user in the browser:
 
 1. Open **設定 (Settings)** in the top bar
 2. Under **管理 API keys (Manage API keys)**, add or edit an OpenAI, Google, or Claude key and its storage preference; each row has a separate delete action, and the editor links to the provider's key application page
-3. **使用模型 (Model)** combines recommended models from configured providers. Enable **顯示全部模型 (Show all models)** for other text models and custom IDs; **更新模型 (Refresh models)** reloads the lists
+3. Open **使用模型 (Model)** and choose from the in-page list grouped by provider. Enable **顯示全部模型 (Show all models)** for other text models and custom IDs; **更新模型 (Refresh models)** reloads the lists
 4. Select a model and save to apply added or edited keys. Deleting a key takes effect immediately. The model determines which provider is called; editing a key does not change the active provider
 
 Notes:
 
-- A ChatGPT Plus subscription does not include API access; API keys are created and billed separately at [platform.openai.com](https://platform.openai.com).
+- New OpenAI users can open the [registration and billing guide](openai-api-key.html) from the link under **管理 API keys (Manage API keys)**. It opens in a new tab and provides a concise Chinese walkthrough with expandable screenshots and reference details.
+- API credits and ChatGPT subscriptions are managed separately. Create keys at [platform.openai.com](https://platform.openai.com); check your account and the [official documentation](https://developers.openai.com/api/docs/guides/chatgpt-api-credits) for any eligible subscription credit benefits.
 - Get a Google key from [Google AI Studio](https://aistudio.google.com/apikey); quota and billing depend on your Google account.
 - Get a Claude key from [Claude Console](https://platform.claude.com/settings/keys); API billing and credits depend on your Console account.
 - Keys are sent only to the selected provider at `api.openai.com`, `generativelanguage.googleapis.com`, or `api.anthropic.com`, never through a site backend.
 - Clearing browser data removes stored keys; keep your own backup. Google free and paid tiers have different data-use terms; see [Google pricing and data use](https://ai.google.dev/gemini-api/docs/pricing).
+- Copy and save the full key when you create it. If it was not saved or has been lost, create a replacement; a shortened key or Tracking ID in the provider's key list cannot replace the full secret key.
+
+## Validation
+
+The app has no runtime package dependencies. Development checks use Node.js and Python with Playwright:
+
+```bash
+node --test scripts/test-ai.cjs scripts/test-providers.cjs
+python -m pip install playwright
+python -m playwright install chromium
+python scripts/test-settings.py
+```
+
+Checks cover AI response parsing, provider requests and key isolation, model selection, saved settings, and mobile layouts. Provider API requests are mocked; no real API key is needed.
 
 ## Deployment
 
@@ -93,14 +112,15 @@ The site is static, so any static host works. For GitHub Pages:
 
 1. **Settings → Pages → Build and deployment**: deploy from branch `main`, folder `/ (root)`
 2. For a custom domain, set it under **Custom domain** (this commits the `CNAME` file) and point a DNS `CNAME` record at `<user>.github.io`
-3. After changing CSS or JS, update the `?v=` version in `index.html` and `404.html` (so CDN caches do not serve stale files) and bump `SHELL_CACHE` in `sw.js`
-4. When moving to another domain, also update the canonical and Open Graph URLs in `index.html`, `robots.txt` and `sitemap.xml`
+3. After changing CSS or JS, update the relevant `?v=` versions in `index.html`, `404.html`, and `openai-api-key.html` to avoid stale CDN responses, and bump `SHELL_CACHE` in `sw.js`. Add new offline resources to its cache list
+4. When moving to another domain, update canonical and Open Graph URLs in the HTML pages, along with `robots.txt` and `sitemap.xml`
 
 ## Project structure
 
 ```text
 .
 ├── index.html            # Markup, views, SVG icon sprite and SEO tags
+├── openai-api-key.html   # OpenAI key registration, billing, and safety guide
 ├── 404.html              # Custom 404 page (served automatically by GitHub Pages)
 ├── manifest.webmanifest  # PWA manifest
 ├── sw.js                 # Service worker (offline cache)
@@ -118,18 +138,22 @@ The site is static, so any static host works. For GitHub Pages:
 │   ├── settings.js       # API key management and combined model selector
 │   └── app.js            # Routing, views and interactions
 ├── images/rws-1909/      # 78 card images + manifest.json (source and license)
+├── images/guide/         # Registration and billing tutorial screenshots
 ├── favicon.ico           # Browser tab icon
 ├── icons/                # Logo sizes, PWA icons and the social preview image
 │   └── source/           # Original logo artwork (1000×1000)
 ├── docs/screenshots/     # Images used in this README
+├── scripts/             # AI/provider checks and Playwright settings UI tests
 ├── README.md             # Traditional Chinese README
 └── LICENSE               # MIT License
 ```
 
 ## Privacy and security
 
-- There is no backend. Questions, history and settings stay in the user's browser.
-- A Content Security Policy only allows same-origin scripts and outbound requests to `api.openai.com`.
+- There is no backend. History, drafts, and settings are stored in the user's browser. When AI assistance is used, questions and background details are sent directly to the selected provider; avoid including unnecessary personal information.
+- Session-only API keys use `sessionStorage`; remembered keys use `localStorage`, without additional encryption. Deleting a key in Tarot Prompt removes the local copy only; revoke it on the provider's official platform to disable it.
+- [OpenAI recommends](https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety) keeping keys on a backend instead of deploying them in browsers or mobile apps. This app currently lets users supply their own keys and calls the provider directly from the browser. Use the copy-prompt workflow if you prefer not to enter a key in the browser.
+- The main app's Content Security Policy restricts script sources and allows outbound API requests only to `api.openai.com`, `generativelanguage.googleapis.com`, and `api.anthropic.com`. The tutorial page runs without JavaScript.
 - No third-party scripts, analytics or fonts are loaded.
 
 ## Browser support
