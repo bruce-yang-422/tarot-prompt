@@ -26,6 +26,7 @@ The app does not interpret the cards itself. It collects everything an LLM needs
 
 ## Features
 
+- **Homepage guide**: fan of original card art, one-tap example questions, spread thumbnails, a full worked example (cards → Prompt → AI reading), a 30-second tarot primer, and an FAQ
 - **Two ways to draw**
   - Online draw: Fisher–Yates shuffle with `crypto.getRandomValues`, 50% chance of reversal
   - Physical deck: enter the cards you drew, with search (Chinese, English and aliases), orientation toggle and "jumper" cards

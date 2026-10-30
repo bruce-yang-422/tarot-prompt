@@ -334,6 +334,36 @@
     });
   });
 
+  // 範例問題：帶入類別與問題後進入問題頁，預設用系統抽牌
+  $$('[data-ex-q]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      S.mode = 'auto';
+      S.form.category = btn.dataset.exCat;
+      S.form.question = btn.dataset.exQ;
+      saveDraft();
+      go('#/ask');
+    });
+  });
+
+  // 首頁的牌陣縮圖：依牌陣座標畫出小方塊（不含選用牌位）
+  $$('#spreadThumbs [data-spread]').forEach((li) => {
+    const spread = T.SPREAD_BY_ID[li.dataset.spread];
+    if (!spread) return;
+    const cells = spread.layout.cells.slice(0, spread.positions.length);
+    const cols = Math.max(...cells.map((c) => c[0]));
+    const rows = Math.max(...cells.map((c) => c[1]));
+    // CSP 不允許 HTML 上的 style 屬性，改用 JS 設定
+    li.insertAdjacentHTML('afterbegin', `<span class="st-board" aria-hidden="true">${cells.map((c) => `<span class="st-card${c[2] ? ' st-card--cross' : ''}"></span>`).join('')}</span>`);
+    const board = li.firstElementChild;
+    board.style.gridTemplateColumns = `repeat(${cols}, var(--st-w))`;
+    board.style.gridTemplateRows = `repeat(${rows}, var(--st-h))`;
+    $$('.st-card', board).forEach((el, i) => {
+      el.style.gridColumn = cells[i][0];
+      el.style.gridRow = cells[i][1];
+    });
+    li.querySelector('.st-name').insertAdjacentHTML('beforeend', `<span class="st-count">${spread.positions.length} 張</span>`);
+  });
+
   // ---------- ① 問題 ----------
 
   let hintTimer = null;

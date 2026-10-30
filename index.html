@@ -56,7 +56,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=20261030i">
+  <link rel="stylesheet" href="css/style.css?v=20261030l">
 </head>
 <body>
   <!-- 自製 SVG 圖示：以 <svg class="icon"><use href="#i-名稱"></use></svg> 引用 -->
@@ -98,14 +98,21 @@
     <!-- 首頁預設顯示（不加 hidden），程式還沒執行時搜尋引擎也讀得到內容 -->
     <section class="view" data-view="home">
       <div class="hero">
-        <img class="hero-logo" src="icons/logo-256.png" alt="問牌 Prompt 標誌：兩張塔羅牌與星月" width="150" height="150">
-        <h1>抽牌，然後讓 AI 解牌</h1>
-        <p class="muted">輸入你的問題、抽出塔羅牌，這裡會整理出一份完整的解牌 Prompt，複製後貼到 ChatGPT、Claude 或 Gemini 就能得到解讀。</p>
+        <div class="hero-fan" role="img" aria-label="1909 年原版偉特塔羅牌：愚者、女祭司、星星、太陽、命運之輪">
+          <img src="images/rws-1909/fool.jpg" alt="" width="600" height="1031" decoding="async">
+          <img src="images/rws-1909/high-priestess.jpg" alt="" width="600" height="1031" decoding="async">
+          <img src="images/rws-1909/stars.jpg" alt="" width="600" height="1031" decoding="async">
+          <img src="images/rws-1909/sun.jpg" alt="" width="600" height="1031" decoding="async">
+          <img src="images/rws-1909/fortune-wheel.jpg" alt="" width="600" height="1031" decoding="async">
+        </div>
+        <h1>塔羅抽牌，交給 AI 解牌</h1>
+        <p class="hero-tags">偉特塔羅 78 張<span aria-hidden="true">・</span>16 種牌陣<span aria-hidden="true">・</span>正逆位</p>
+        <p class="muted">線上抽牌或輸入你手上實體牌的結果，這裡會把問題、牌陣、牌位與正逆位整理成一份完整的解牌 Prompt，複製後貼到 ChatGPT、Claude 或 Gemini 就能得到解讀。</p>
       </div>
       <div class="mode-cards">
         <button class="mode-card" type="button" data-start="auto">
           <img class="mode-icon" src="icons/tarot-cards-star-moon.png" alt="" width="44" height="44">
-          <span class="mode-title">系統自動抽牌</span>
+          <span class="mode-title">系統自動抽牌<span class="mode-badge">第一次用選這個</span></span>
           <span class="mode-desc">沒有牌也能占卜</span>
         </button>
         <button class="mode-card" type="button" data-start="manual">
@@ -116,6 +123,77 @@
       </div>
       <a class="recent" id="recentLink" href="#/history" hidden></a>
 
+      <section class="home-sec" aria-labelledby="askExTitle">
+        <h2 id="askExTitle">不知道問什麼？點一個開始</h2>
+        <div class="ask-examples">
+          <button type="button" class="ask-ex" data-ex-cat="感情" data-ex-q="我和他的關係接下來三個月會如何發展？"><span class="ask-ex-cat">感情</span>我和他的關係接下來三個月會如何發展？</button>
+          <button type="button" class="ask-ex" data-ex-cat="事業" data-ex-q="我要如何爭取升遷的機會？"><span class="ask-ex-cat">事業</span>我要如何爭取升遷的機會？</button>
+          <button type="button" class="ask-ex" data-ex-cat="事業" data-ex-q="留在現在的公司，還是換工作，哪個選擇比較適合我？"><span class="ask-ex-cat">事業</span>留在現在的公司，還是換工作，哪個比較適合我？</button>
+          <button type="button" class="ask-ex" data-ex-cat="財運" data-ex-q="最近三個月，我該如何改善自己的財務狀況？"><span class="ask-ex-cat">財運</span>最近三個月，我該如何改善財務狀況？</button>
+          <button type="button" class="ask-ex" data-ex-cat="人際" data-ex-q="我該如何改善和同事之間的關係？"><span class="ask-ex-cat">人際</span>我該如何改善和同事之間的關係？</button>
+          <button type="button" class="ask-ex" data-ex-cat="自我成長" data-ex-q="我最近總是提不起勁，背後的原因是什麼？"><span class="ask-ex-cat">自我成長</span>我最近總是提不起勁，原因是什麼？</button>
+        </div>
+        <p class="muted small">點了會帶入問題頁，可以再修改成你自己的狀況。</p>
+      </section>
+
+      <section class="home-sec" aria-labelledby="spreadsTitle">
+        <h2 id="spreadsTitle">16 種牌陣，會依你的問題推薦</h2>
+        <!-- 牌陣縮圖由 app.js 依 spreads.js 的排列座標畫出 -->
+        <ul class="spread-thumbs" id="spreadThumbs">
+          <li data-spread="single"><span class="st-name">單張指引</span></li>
+          <li data-spread="timeline"><span class="st-name">時間之流</span></li>
+          <li data-spread="relation"><span class="st-name">棘手關係</span></li>
+          <li data-spread="choice2"><span class="st-name">二擇一</span></li>
+          <li data-spread="fortune"><span class="st-name">能量運勢</span></li>
+          <li data-spread="celtic"><span class="st-name">凱爾特十字</span></li>
+        </ul>
+        <p class="muted small">另有是非題、三擇一、事件洞察、自我探索等牌陣，分成快速指引、時間與趨勢、人際關係、決策與行動、自我探索、綜合 6 組。</p>
+      </section>
+
+      <section class="home-sec" aria-labelledby="sampleTitle">
+        <h2 id="sampleTitle">範例：抽完牌會得到什麼</h2>
+        <div class="sample">
+          <p class="sample-q"><span class="sample-label">問題</span>我要如何爭取升遷的機會？<span class="muted small">（事業・三個月內・時間之流）</span></p>
+          <ol class="sample-cards">
+            <li><span class="sample-pos">過去</span><img src="images/rws-1909/three-wands.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><span class="sample-card">權杖三・正位</span></li>
+            <li><span class="sample-pos">現在</span><img class="is-rev" src="images/rws-1909/eight-swords.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><span class="sample-card">寶劍八・逆位</span></li>
+            <li><span class="sample-pos">未來</span><img src="images/rws-1909/eight-pentacles.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><span class="sample-card">錢幣八・正位</span></li>
+          </ol>
+          <details class="sample-more">
+            <summary>網站整理出的 Prompt（節錄）</summary>
+            <pre class="sample-pre">你是一位經驗豐富的塔羅解讀師，熟悉偉特—史密斯塔羅體系。請根據下方的設定（YAML）與牌面資料（JSON）為我解牌。
+
+querent:
+  question: "我要如何爭取升遷的機會？"
+  category: "事業"
+  timeframe: "三個月內"
+spread:
+  name: "時間之流"
+  card_count: 3
+reversed_reading_rules: …
+output:
+  tone: …
+  language: "繁體中文"
+
+{ "no": 2, "position": "現在", "position_meaning": "目前約一個月的狀態",
+  "card": "寶劍八", "card_en": "Eight of Swords", "orientation": "逆位" }
+…（另含牌面統計：大牌比例、元素分布、重複數字）</pre>
+          </details>
+          <details class="sample-more">
+            <summary>貼到 ChatGPT 後的解讀（節錄）</summary>
+            <div class="sample-reply">
+              <p><strong>過去・權杖三</strong>：你已經開始思考更長遠的職涯發展，並非毫無準備。但要留意，你可能正在等待別人主動發現你的價值，而努力與被看見並不完全相同。</p>
+              <p><strong>現在・寶劍八（逆位）</strong>：採用「能量不足」的解讀：束縛正在減弱，但還沒完全擺脫。有些限制來自尚未驗證的假設，例如擔心太有野心、猜測主管已有人選。直接詢問升遷標準，比反覆猜測更有幫助。</p>
+              <p><strong>未來・錢幣八</strong>：未來兩到三個月，最值得投入的是建立足以支持升遷的績效證據，例如承接有影響力的專案、改善工作流程。</p>
+              <p><strong>牌與牌的關聯</strong>：連續出現兩張「八」，課題是從「我是否有資格」轉向「我要如何證明」；三張牌缺少水元素，也別忘了經營與主管、同事的信任關係。</p>
+              <p><strong>行動建議</strong>：第一個月釐清升遷條件，第二個月交付一項可量化的成果，第三個月整理證據、正式表達升遷意願。</p>
+              <p><strong>一句話總結</strong>：停止被不確定感困住，主動表達企圖心，用具體可衡量的成果，讓自己成為值得被考慮的人選。</p>
+            </div>
+            <p class="muted small">以上節錄自 ChatGPT 的實際回覆，原文還有完整牌面說明與三個月行動清單；實際內容依你使用的 AI 而定。</p>
+          </details>
+        </div>
+      </section>
+
       <section class="how" aria-labelledby="howTitle">
         <h2 id="howTitle">怎麼用</h2>
         <ol class="how-steps">
@@ -124,6 +202,158 @@
           <li><strong>交給 AI 解牌</strong>複製整理好的 Prompt，貼到 ChatGPT、Claude 或 Gemini。</li>
         </ol>
         <p class="muted small">使用 1909 年原版偉特塔羅（Rider–Waite–Smith）牌圖。免費使用，資料只存在你的瀏覽器；可以「加到主畫面」當成 App 使用。</p>
+      </section>
+
+      <section class="home-sec" aria-labelledby="basicsTitle">
+        <h2 id="basicsTitle">3 分鐘認識塔羅</h2>
+        <p class="muted small basics-lead">已經熟悉塔羅可以跳過；想先複習一下，點開任一主題。</p>
+
+        <details class="faq">
+          <summary>一副牌的組成：78 張</summary>
+          <div class="faq-body">
+            <ul class="deck-stats">
+              <li><strong>22</strong><span>大牌</span><small>人生課題與轉折</small></li>
+              <li><strong>40</strong><span>數字牌</span><small>一～十，各四種花色</small></li>
+              <li><strong>16</strong><span>宮廷牌</span><small>侍從、騎士、皇后、國王</small></li>
+            </ul>
+            <p>大牌（Major Arcana，又稱大阿爾克那）是一組有編號的象徵牌，從 0 號「愚者」到 21 號「世界」。小牌（Minor Arcana）共 56 張，分成權杖、聖杯、寶劍、錢幣四種花色，每種花色有一到十的數字牌，加上四張宮廷牌。</p>
+            <p>本站使用的是 1909 年由 Pamela Colman Smith 繪製的偉特—史密斯（Rider–Waite–Smith）原版牌。它的小牌也畫有完整的情境畫面，影響了後來大多數的塔羅牌，現今許多塔羅書與牌義都以它為基準。</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>22 張大牌：愚者的旅程</summary>
+          <div class="faq-body">
+            <p>大牌常被解讀成一段旅程：0 號愚者帶著好奇出發，一路遇見其他大牌代表的人物與課題，最後走到 21 號世界，完成一個循環。</p>
+            <ul class="refs">
+              <li class="ref ref--major"><img src="images/rws-1909/fool.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>0　愚者</strong><span class="ref-sub">旅程的起點</span><span class="ref-body">一切的可能性，帶著開放的心踏出第一步。</span></li>
+              <li class="ref ref--major"><img src="images/rws-1909/chariot.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>1～7　魔術師 → 戰車</strong><span class="ref-sub">建立自我</span><span class="ref-body">學習運用資源、認識規範與關係，靠意志向外爭取。</span></li>
+              <li class="ref ref--major"><img src="images/rws-1909/temperance.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>8～14　力量 → 節制</strong><span class="ref-sub">向內探索</span><span class="ref-body">學會耐心與取捨，面對停滯、結束與轉變，找回平衡。</span></li>
+              <li class="ref ref--major"><img src="images/rws-1909/world.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>15～21　惡魔 → 世界</strong><span class="ref-sub">突破與圓滿</span><span class="ref-body">面對慾望與陰影，經過崩解、希望與覺醒，最後完成整合。</span></li>
+            </ul>
+            <p><strong>解讀時</strong>：大牌通常代表較大、較深層的力量。一次抽到很多大牌，表示這件事對你影響深遠，或正處於重要轉折；大多是小牌時，課題比較貼近日常的選擇與行動，自己能掌握的部分也比較多。</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>四種花色與元素</summary>
+          <div class="faq-body">
+            <p>小牌的四種花色各對應一種元素。看一組牌時，哪個元素特別多或完全沒有，常常就是解讀的線索。</p>
+            <ul class="refs">
+              <li class="ref ref--fire"><img src="images/rws-1909/ace-wands.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>權杖・火</strong><span class="ref-sub">陽性：向外、積極行動</span><span class="ref-body">行動、事業、移動。熱情、企圖心與創造力；常出現在工作與目標相關的問題。</span></li>
+              <li class="ref ref--water"><img src="images/rws-1909/ace-cups.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>聖杯・水</strong><span class="ref-sub">陰性：向內、情緒訊息豐富</span><span class="ref-body">情緒、感受、愛、藝術靈感。關係與內心感受；常出現在感情與人際問題。</span></li>
+              <li class="ref ref--air"><img src="images/rws-1909/ace-swords.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>寶劍・風</strong><span class="ref-sub">陽性：向外、行動與衝突</span><span class="ref-body">思維、溝通、智慧、計劃。判斷、決定與壓力；也代表爭執、焦慮或需要切割的事。</span></li>
+              <li class="ref ref--earth"><img src="images/rws-1909/ace-pentacles.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>錢幣・土</strong><span class="ref-sub">陰性：向內、務實穩定</span><span class="ref-body">金錢、資源、物質、健康。收入、工作成果與身體狀況；重視實際、可累積的成果。</span></li>
+            </ul>
+            <p><strong>元素多寡</strong>：例如火很多、水很少，可能代表行動力強，卻忽略了感受與關係。本站產生的 Prompt 會附上元素分布（大牌依黃金黎明體系的占星對應計入），讓 AI 一併參考。</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>數字牌：一到十的意義</summary>
+          <div class="faq-body">
+            <p>同一個數字在四種花色裡有共通的主題，只是發生的領域不同。例如「五」都和改變、動盪有關：權杖五是競爭，聖杯五是失落，寶劍五是爭執，錢幣五是匱乏。每個數字都有能量好與能量低落兩種表現：</p>
+            <div class="table-wrap">
+              <table class="num-table">
+                <thead><tr><th scope="col">數字</th><th scope="col">主題</th><th scope="col">能量好時</th><th scope="col">能量低落時</th></tr></thead>
+                <tbody>
+                <tr><th scope="row">1</th><td>開始</td><td>新的階段與開始</td><td>遲遲沒有開始、為做而做、自我中心</td></tr>
+                <tr><th scope="row">2</th><td>選擇與平衡</td><td>合作、連結、平衡</td><td>對立、出現競爭</td></tr>
+                <tr><th scope="row">3</th><td>發展與成長</td><td>發展、創意、團結</td><td>向下衰退</td></tr>
+                <tr><th scope="row">4</th><td>穩定</td><td>穩定、安全、保守</td><td>守舊、不知變通</td></tr>
+                <tr><th scope="row">5</th><td>改變</td><td>突破、改變、冒險</td><td>混亂與衝動</td></tr>
+                <tr><th scope="row">6</th><td>調和</td><td>調和、整理、協調</td><td>妥協、過度熱心</td></tr>
+                <tr><th scope="row">7</th><td>個人特質</td><td>分析、獨特、做自己</td><td>特立獨行、孤軍奮戰</td></tr>
+                <tr><th scope="row">8</th><td>模式與循環</td><td>循環、執行力佳</td><td>執念、控制欲強</td></tr>
+                <tr><th scope="row">9</th><td>飽和</td><td>收穫豐盛、智慧與包容</td><td>未被滿足、期待落空</td></tr>
+                <tr><th scope="row">10</th><td>階段完成</td><td>圓滿、階段的結束與新開始</td><td>負荷到極限、只能接受結局</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p><strong>重複數字</strong>：同一個數字出現兩次以上，代表這個主題特別明顯。例如多張一，代表很多新的開始；多張五，代表變動與衝突集中。本站會統計重複數字並寫進 Prompt。</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>宮廷牌：人物，也是狀態</summary>
+          <div class="faq-body">
+            <p>每種花色有四張宮廷牌，可以代表身邊的某個人，也可以代表你自己在這件事裡的成熟度與做事方式。花色決定性格，階級決定成熟度：例如聖杯騎士是浪漫、跟著感受行動的人，錢幣國王是穩重、掌握資源的人。</p>
+            <ul class="refs">
+              <li class="ref ref--court"><img src="images/rws-1909/page-cups.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>侍從</strong><span class="ref-sub">Page</span><span class="ref-body">新手、不成熟、新階段或嘗試性的體驗；也常代表消息與邀請。</span></li>
+              <li class="ref ref--court"><img src="images/rws-1909/knight-wands.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>騎士</strong><span class="ref-sub">Knight</span><span class="ref-body">累積實力中、勇於挑戰，為目標移動與推進。</span></li>
+              <li class="ref ref--court"><img src="images/rws-1909/queen-swords.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>皇后</strong><span class="ref-sub">Queen</span><span class="ref-body">支持與輔導他人；陰性能量，包容轉化式的領導。</span></li>
+              <li class="ref ref--court"><img src="images/rws-1909/king-pentacles.jpg" alt="" width="600" height="1031" loading="lazy" decoding="async"><strong>國王</strong><span class="ref-sub">King</span><span class="ref-body">領域中的權威；陽性能量，命令式領導並肩負社會責任。</span></li>
+            </ul>
+            <p><strong>解讀時</strong>：一次出現很多宮廷牌，通常代表這件事牽涉的人很多，或別人的意見影響很大。</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>正位與逆位</summary>
+          <div class="faq-body">
+            <p>牌面朝上是正位，倒過來是逆位。逆位<strong>不等於壞事</strong>，比較像是同一種能量出現了不同的狀態。常見的讀法有：</p>
+            <ul class="plain-list">
+              <li><strong>能量不足</strong>：有正位的能量但不夠充足，是目前要學習的課題。</li>
+              <li><strong>能量過多</strong>：正位的能量過頭，需要調節。</li>
+              <li><strong>相反含義</strong>：取正位意義的反面。</li>
+              <li><strong>回推前一張牌</strong>：大牌順序中前一張的課題還沒完成，例如太陽逆位，回到月亮。</li>
+              <li><strong>取牌面元素</strong>：直接用畫面上的人物、物件對應問題。</li>
+              <li><strong>維持正位意義</strong>：和其他牌搭配時，正逆位差異不大。</li>
+              <li><strong>視為「沒有」</strong>：多張逆位都呈現能量不足時，可解讀為沒有、結束、沒有發展空間。</li>
+            </ul>
+            <p>本站的系統抽牌正逆位各占一半，也可以設定「只用正位」；自我探索類牌陣一律以正位解讀。Prompt 會附上這些讀法，請 AI 依脈絡選用並說明理由。</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>牌陣與牌位</summary>
+          <div class="faq-body">
+            <p>牌陣決定要抽幾張牌、每張牌放在哪個位置，以及<strong>每個位置代表什麼</strong>。同一張牌放在不同位置，意思就不同：寶劍三在「過去」是已經發生的傷心事，在「建議」則可能是提醒你正視難過的情緒。</p>
+            <ul class="plain-list">
+              <li><strong>張數少（1～3 張）</strong>：回答單一、明確的問題，例如今天的提醒、是非傾向、過去現在未來。</li>
+              <li><strong>中等（4～7 張）</strong>：看關係中雙方的態度、比較兩三個選擇，或拆解一件事的原因與阻礙。</li>
+              <li><strong>張數多（10 張）</strong>：例如凱爾特十字，全面分析一件事的來龍去脈。</li>
+            </ul>
+            <p>不確定要用哪個牌陣也沒關係，填完問題後，本站會依你的問題類別與狀況推薦。</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>抽牌前的小提醒</summary>
+          <div class="faq-body">
+            <ul class="plain-list">
+              <li><strong>先想清楚問題</strong>：問題越具體，解讀越有用。以自己為主角、問三個月內的事，效果最好。</li>
+              <li><strong>專注再抽</strong>：抽牌前花幾秒默念問題。本站的系統抽牌也有靜心倒數，不需要時可以跳過。</li>
+              <li><strong>同一個問題不要反覆抽</strong>：一直重抽，直到出現想要的答案，只會讓自己更混亂。真的看不懂，可以補抽一張指引牌。</li>
+              <li><strong>跳出牌也是訊息</strong>：用實體牌洗牌時自己掉出來的牌，可以在手動輸入時一起加入，當作額外提示。</li>
+              <li><strong>保留判斷力</strong>：牌給的是觀點與提醒，最後的決定還是在你。</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section class="home-sec" aria-labelledby="faqTitle">
+        <h2 id="faqTitle">常見問題</h2>
+        <details class="faq">
+          <summary>需要付費或註冊嗎？</summary>
+          <div class="faq-body"><p>不用。抽牌、產生 Prompt 都免費，也不需要帳號。把 Prompt 貼到 ChatGPT、Claude 或 Gemini 的免費版就能解讀。設定裡的 API key 是選用功能，沒有也能完整使用。</p></div>
+        </details>
+        <details class="faq">
+          <summary>什麼是 Prompt？為什麼不直接在網站上解牌？</summary>
+          <div class="faq-body"><p>Prompt 就是要貼給 AI 的提問內容。直接問 AI「幫我解牌」常常資訊不完整；這裡會把問題、背景、每個牌位的意義、正逆位和牌面統計整理好，AI 才能解得具體。你可以選自己習慣的 AI，也能在同一個對話裡繼續追問。</p></div>
+        </details>
+        <details class="faq">
+          <summary>沒有實體牌可以用嗎？</summary>
+          <div class="faq-body"><p>可以。選「系統自動抽牌」，網站會用瀏覽器內建的安全亂數洗牌，正逆位各占一半。有自己的牌，就選「實體牌手動輸入」。</p></div>
+        </details>
+        <details class="faq">
+          <summary>我的問題會被別人看到嗎？</summary>
+          <div class="faq-body"><p>不會。本站沒有伺服器，問題和占卜紀錄只存在你的瀏覽器。只有當你把 Prompt 貼到 AI 服務，或在設定中使用自己的 API key 時，內容才會送到那家 AI 服務。</p></div>
+        </details>
+        <details class="faq">
+          <summary>塔羅準嗎？</summary>
+          <div class="faq-body"><p>塔羅比較像一面鏡子，幫你整理想法、看見平常忽略的角度，而不是決定未來的答案。問三個月內、以自己為主角的問題，通常最有收穫。健康、法律、財務等重大決定，請諮詢專業人士。</p></div>
+        </details>
       </section>
     </section>
 
@@ -385,7 +615,7 @@
   <script src="js/storage.js?v=20261028b"></script>
   <script src="js/ai.js?v=20261028h"></script>
   <script src="js/settings.js?v=20261030a"></script>
-  <script src="js/app.js?v=20261028i"></script>
+  <script src="js/app.js?v=20261030a"></script>
   <script src="js/install.js?v=20261027c"></script>
 </body>
 </html>
