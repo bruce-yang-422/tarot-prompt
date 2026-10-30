@@ -114,13 +114,13 @@ Notes:
 The app has no runtime package dependencies. Development checks use Node.js and Python with Playwright:
 
 ```bash
-node --test scripts/test-ai.cjs scripts/test-providers.cjs
+node --test scripts/test-ai.cjs scripts/test-providers.cjs scripts/test-timeframes.cjs
 python -m pip install playwright
 python -m playwright install chromium
 python scripts/test-settings.py
 ```
 
-Checks cover AI response parsing, provider requests and key isolation, model selection, saved settings, and mobile layouts. Provider API requests are mocked; no real API key is needed.
+Checks cover AI response parsing, provider requests and key isolation, model selection, timeframe propagation, saved settings, and mobile layouts. Provider API requests are mocked; no real API key is needed.
 
 ## Deployment
 

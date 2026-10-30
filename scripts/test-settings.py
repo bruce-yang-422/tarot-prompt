@@ -1,5 +1,6 @@
 """Browser checks for combined model selection. All provider requests are mocked."""
 import json
+import re
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -42,6 +43,7 @@ class ModelSettingsTests(unittest.TestCase):
         self.claude_followup = False
         self.claude_blocked = False
         self.google_quiz_text = None
+        self.suggest_timeframe = ''
         self.page.on('pageerror', lambda err: self.errors.append(str(err)))
         self.page.route('https://api.openai.com/**', self.api)
         self.page.route('https://generativelanguage.googleapis.com/**', self.api)
@@ -87,7 +89,7 @@ class ModelSettingsTests(unittest.TestCase):
                     result = {'stop_reason': 'end_turn', 'stop_details': {'type': 'refusal'}, 'content': []}
                 route.fulfill(content_type='application/json', body=json.dumps(result))
                 return
-            value = {'questions': [{'text': 'How can I improve my sleep routine?', 'why': 'Based on supplied context'}]}
+            value = {'questions': [{'text': 'How can I improve my sleep routine?', 'why': 'Based on supplied context'}], 'timeframe': self.suggest_timeframe}
             if google and 'followUp' not in req.post_data_json['generationConfig']['responseJsonSchema']['properties']:
                 text = self.google_quiz_text or json.dumps({'questions': [{'label': 'What has your manager said?', 'type': 'single', 'options': ['We spoke', 'Not yet'], 'placeholder': ''}]})
                 route.fulfill(content_type='application/json', body=json.dumps({'candidates': [{'finishReason': 'STOP', 'content': {'parts': [{'text': text}]}}]}))
@@ -142,6 +144,50 @@ class ModelSettingsTests(unittest.TestCase):
         expect(self.page.locator('#modelPickerList')).to_be_hidden()
         self.page.locator('#saveSettings').click()
         self.assertEqual(self.page.evaluate('() => Tarot.store.getSettings().ai.provider'), 'claude')
+
+    def test_saved_reading_uses_its_own_timeframe_in_prompt_and_positions(self):
+        self.page.goto(self.url, wait_until='networkidle')
+        for spread in ['timeline', 'fortune']:
+            for timeframe in ['一週內', '一個月內', '接下來十天']:
+                with self.subTest(spread=spread, timeframe=timeframe):
+                    self.page.evaluate('''({spread, timeframe}) => {
+                        const T = Tarot;
+                        const id = spread + timeframe;
+                        T.store.saveRecord({id, spreadId: spread, mode: 'auto', createdAt: Date.now(),
+                            form: {question: '我要如何改善工作狀況？', category: '事業', timeframe},
+                            cards: Object.keys(T.CARD_BY_ID).slice(0, T.SPREAD_BY_ID[spread].positions.length).map(id => ({id, reversed: false})),
+                            jumpers: [], clarifiers: [], withOptional: false});
+                        location.hash = '#/result/' + encodeURIComponent(id);
+                    }''', {'spread': spread, 'timeframe': timeframe})
+                    prompt = self.page.locator('#promptText')
+                    expect(prompt).to_have_value(re.compile('timeframe: "' + timeframe + '"'))
+                    text = prompt.input_value()
+                    self.assertIn(f'querent.timeframe「{timeframe}」為準', text)
+                    self.assertNotIn('未來兩到三個月的狀態', text)
+                    if spread == 'fortune':
+                        expect(self.page.locator('#resultBoard .bslot-no').last).to_have_attribute('title', '第 6 階段')
+
+    def test_ai_suggestion_does_not_overwrite_selected_timeframe(self):
+        self.open_settings(keys=('openai',), show_all=False)
+        self.choose('openai', 'gpt-6-luna')
+        self.page.locator('#saveSettings').click()
+        self.page.locator('[data-start="auto"]').click()
+        self.page.locator('#fQuestion').fill('I need a clearer plan to improve communication with my manager')
+        self.suggest_timeframe = '三個月'
+        for timeframe in ['一週內', '一個月內', '接下來十天']:
+            with self.subTest(timeframe=timeframe):
+                if timeframe == '接下來十天':
+                    self.page.locator('[data-tf-custom]').click()
+                    self.page.locator('#fTimeframeCustom').fill(timeframe)
+                else:
+                    self.page.locator(f'[data-tf="{timeframe}"]').click()
+                self.page.locator('#openAi').click()
+                expect(self.page.locator('[data-ai="0"]')).to_be_visible()
+                self.page.locator('[data-ai="0"]').click()
+                actual = self.page.evaluate('() => Tarot.store.getDraft().form.timeframe')
+                self.assertEqual(actual, timeframe)
+                body = [call for call in self.calls if call['method'] == 'POST'][-1]['body']
+                self.assertIn(timeframe, json.dumps(body, ensure_ascii=False))
 
     def test_combines_models_and_selection_controls_request_routing(self):
         self.open_settings()

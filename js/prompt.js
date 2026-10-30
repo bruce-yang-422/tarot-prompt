@@ -68,8 +68,8 @@
 
   T.buildPrompt = function (record, prefs) {
     const spread = T.SPREAD_BY_ID[record.spreadId];
-    const positions = T.getPositions(spread, record.withOptional);
     const f = record.form || {};
+    const positions = T.getPositions(spread, record.withOptional, f.timeframe);
     const self = spread.type === 'self';
     const main = T.entriesOf(record.cards);
     const jumpers = T.entriesOf(record.jumpers);
@@ -108,7 +108,8 @@
       ? ['描述每張牌的畫面與象徵，連結到牌位意義', '針對每張牌提出 1～2 個引導我自我覺察的問題', '整理出我可以帶走的一個洞察']
       : ['逐張解讀：結合牌位意義與正逆位', '說明牌與牌之間的關聯，串成完整的故事', '給出具體可行的行動建議', '最後用一句話總結'];
     req.push(...typeRequirements(spread, record, stats));
-    if (T.isLongTimeframe(f.timeframe)) req.push('時間範圍超過三個月，請以近三個月的趨勢為主要解讀，較遠的部分只作方向參考');
+    if (f.timeframe) req.push(`本次解讀、未來發展與行動建議必須以 querent.timeframe「${f.timeframe}」為準，不得自行延長或改成其他時間範圍；問題或背景若提及其他期間，仍以此選擇為準；過去牌位僅作背景，不延長未來預測期間`);
+    if (T.isLongTimeframe(f.timeframe)) req.push('所選時間範圍較長，較遠的發展只作方向參考，請說明不確定性，但不可擅自改變使用者選擇的時間範圍');
     Y.push('requirements:', ...req.map((r) => `  - ${q(r)}`));
 
     Y.push('output:', `  tone: ${q(tone.text)}`, `  length: ${q(`約 ${length.chars} 字`)}`, `  language: ${q('繁體中文')}`, '  notes:');
@@ -155,7 +156,7 @@
       case 'timeline':
         return [record.withOptional ? '依時間順序說明趨勢，最後以「建議」牌收尾' : '依時間順序說明趨勢'];
       case 'fortune':
-        return ['依序說明每個月的運勢，指出哪幾個月的牌與問題主題相關；若都不相關，請誠實說明這段期間看不出跡象，並建議可以從哪裡著手'];
+        return ['依牌位標示的時間階段依序說明運勢，指出哪些階段的牌與問題主題相關；只有牌位明確標示月份時才逐月解讀，不得延長所選時間範圍；若都不相關，請誠實說明這段期間看不出跡象，並建議可以從哪裡著手'];
       case 'relation':
         return ['第 2、3 張若為人物牌，請留意兩張牌人物的眼神方向、表情與互動'];
       case 'choice':

@@ -65,7 +65,7 @@
       id: 'fortune',
       group: 'time',
       name: '能量運勢',
-      description: '未來六個月，一個月一張，看哪個時段有機會',
+      description: '將所選時間範圍分成六個階段，看哪個時段有機會',
       examples: ['未來半年我的桃花運勢如何？', '未來半年我的求職運勢如何？'],
       type: 'fortune',
       positions: Array.from({ length: 6 }, (_, i) => ({ name: `第 ${i + 1} 個月`, meaning: `從現在起第 ${i + 1} 個月的運勢` })),
@@ -245,8 +245,21 @@
 
   T.SPREAD_BY_ID = Object.fromEntries(T.SPREADS.map((s) => [s.id, s]));
 
-  T.getPositions = function (spread, withOptional) {
-    return spread.positions.concat(withOptional && spread.optional ? spread.optional : []);
+  T.getPositions = function (spread, withOptional, timeframe) {
+    let positions = spread.positions;
+    if (timeframe && spread.type === 'timeline') {
+      positions = positions.map((p, i) => ({ ...p, meaning: [
+        '形成目前狀態的過往經驗與背景',
+        `現在的狀態，以及影響接下來「${timeframe}」的因素`,
+        `從現在起「${timeframe}」範圍內的發展`,
+      ][i] }));
+    } else if (timeframe && spread.type === 'fortune' && timeframe !== '半年內') {
+      positions = positions.map((p, i) => ({
+        ...p, name: `第 ${i + 1} 階段`,
+        meaning: `將「${timeframe}」分成六個依序階段，這是第 ${i + 1} 階段的趨勢；不可將每一階段固定當成一個月`,
+      }));
+    }
+    return positions.concat(withOptional && spread.optional ? spread.optional : []);
   };
 
   const PERSON = /(他|她|對方|男友|女友|男朋友|女朋友|老公|老婆|先生|太太|伴侶|曖昧|前任|現任|主管|老闆|同事|朋友|家人|媽媽|爸爸)/;

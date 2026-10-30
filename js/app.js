@@ -83,7 +83,7 @@
   }
 
   const currentSpread = () => T.SPREAD_BY_ID[S.spreadId];
-  const currentPositions = () => T.getPositions(currentSpread(), S.withOptional);
+  const currentPositions = () => T.getPositions(currentSpread(), S.withOptional, S.form.timeframe);
 
   // ---------- 共用元件 ----------
 
@@ -115,8 +115,8 @@
   );
 
   // 依牌陣座標排出格子；renderCell(position, index) 回傳格子內容
-  function buildBoard(container, spread, withOptional, renderCell) {
-    const positions = T.getPositions(spread, withOptional);
+  function buildBoard(container, spread, withOptional, renderCell, timeframe = S.form.timeframe) {
+    const positions = T.getPositions(spread, withOptional, timeframe);
     const cells = spread.layout.cells.slice(0, positions.length);
     const cols = Math.max(...cells.map((c) => c[0]));
     const rows = Math.max(...cells.map((c) => c[1]));
@@ -370,7 +370,7 @@
   let customTimeframe = false;
 
   const LONG_TIP =
-    '塔羅最適合看三個月內的發展，時間拉得越長，準確度越低。仍然可以這樣問，建議搭配「能量運勢」牌陣（一個月一張，看半年的變化），或把問題聚焦在近期能做的事。';
+    '時間範圍較長時，較遠的發展只作方向參考。仍會保留你選擇的範圍；可搭配「能量運勢」牌陣，分成六個階段觀察，或把問題聚焦在近期能做的事。';
 
   // 時間範圍：預設選項按鈕＋自訂；超過三個月仍可選，但顯示提示
   function renderTimeframe() {
@@ -1098,7 +1098,7 @@
   function drawResult(fresh, newExtra = -1) {
     const { rec } = resultState;
     const sp = T.SPREAD_BY_ID[rec.spreadId];
-    const positions = T.getPositions(sp, rec.withOptional);
+    const positions = T.getPositions(sp, rec.withOptional, rec.form && rec.form.timeframe);
     const main = T.entriesOf(rec.cards);
     const jumpers = T.entriesOf(rec.jumpers);
     const clarifiers = T.entriesOf(rec.clarifiers);
@@ -1166,7 +1166,7 @@
         `<div class="flip${fresh ? '' : ' is-flipped'}"><div class="face face-back" aria-hidden="true"></div><div class="face face-front">${faceHTML(e.card, e.reversed)}</div></div>` +
         `<span class="bslot-no" title="${esc(p.name)}">${i + 1}</span>`
       );
-    });
+    }, rec.form && rec.form.timeframe);
     fitBoard($('#resultBoard'));
     if (newExtra >= 0) {
       const card = $$('#extraCards .extra')[newExtra];
@@ -1491,8 +1491,8 @@
     S.form.question = chosen;
     // 使用者已經選了類別就尊重他的選擇，沒選才用 AI 建議的
     if (res.category && !S.form.category) S.form.category = res.category;
-    // AI 常回「三個月」，對應到選項「三個月內」
-    if (res.timeframe) S.form.timeframe = T.TIMEFRAMES.includes(res.timeframe + '內') ? res.timeframe + '內' : res.timeframe;
+    // 已選的時間範圍優先，避免 AI 建議把一週／一個月改成三個月。
+    if (res.timeframe && !S.form.timeframe) S.form.timeframe = T.TIMEFRAMES.includes(res.timeframe + '內') ? res.timeframe + '內' : res.timeframe;
     if (res.spreads.length) {
       S.aiSpreads = res.spreads;
       S.spreadId = null;

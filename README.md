@@ -114,13 +114,13 @@ API 串接是選用功能，每位使用者在自己的瀏覽器設定：
 網站執行不需要套件；開發測試使用 Node.js，以及 Python 的 Playwright：
 
 ```bash
-node --test scripts/test-ai.cjs scripts/test-providers.cjs
+node --test scripts/test-ai.cjs scripts/test-providers.cjs scripts/test-timeframes.cjs
 python -m pip install playwright
 python -m playwright install chromium
 python scripts/test-settings.py
 ```
 
-測試涵蓋 AI 回覆解析、供應商請求與 key 隔離、模型選擇、設定保存及手機版排版。供應商 API 請求使用模擬資料，不需要真實 API key。
+測試涵蓋 AI 回覆解析、供應商請求與 key 隔離、模型選擇、時間範圍傳遞、設定保存及手機版排版。供應商 API 請求使用模擬資料，不需要真實 API key。
 
 ## 部署
 

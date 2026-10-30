@@ -55,7 +55,7 @@
   const PRINCIPLES = [
     '1. 以我自己為主角，不替別人問',
     '2. 根據真實正在發生的狀況，不問假設性的事',
-    '3. 以三個月內的短期發展為主',
+    '3. 尊重使用者已選的時間範圍，未提供時才建議近期的範圍',
     '4. 是我真心想知道的事',
     '5. 用肯定句發問，例如「我要如何……」，而不是「能不能……」',
   ];
@@ -111,6 +111,7 @@
       (form.question || '').trim() || '（未填）',
     ];
     L.push(...T.contextLines(form));
+    if (form.timeframe) L.push('', `【已選時間範圍】${form.timeframe}`, '改寫問題與行動方向必須維持此時間範圍，不得自行延長或改成其他期間；回傳的 timeframe 也必須與此選擇一致。');
     if ((form.background || '').trim()) L.push(form.background.trim());
     L.push('', '【好問題的原則】', ...PRINCIPLES, '');
     L.push('資訊足夠時，提供最多 3 個有實際差異的問題，每個附一句理由；只有一兩個合適角度就少給，不要用抽象套話湊數。');
@@ -369,6 +370,7 @@
       '',
       `【問題】${(form.question || '').trim() || '（未填）'}`,
       `【類別】${form.category || '未選'}`,
+      form.timeframe ? `【已選時間範圍】${form.timeframe}；追加問題請聚焦在此範圍，不要自行改變期間。` : '',
       `【已回答的背景】${context.length ? '\n' + context.join('\n') : '（尚未回答）'}`,
       form.background ? `【其他補充】${form.background.trim()}` : '',
       `【已經問過的題目，不要重複】${asked.join('、')}`,
